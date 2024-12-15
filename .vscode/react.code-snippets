@@ -1,0 +1,8 @@
+{
+  "className": {
+    "prefix": "cln",
+    "body": ["className={styles.$2}"],
+    "description": "className={styles.xxx}",
+    "scope": "typescript,typescriptreact"
+  }
+}
