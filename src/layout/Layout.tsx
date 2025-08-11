@@ -8,16 +8,22 @@ import { useEffect } from "react";
 import PublicBreadcrumb from "@/components/PublicBreadcrumb";
 
 export default function Layout() {
+  const { sideNavHide, topNavHide } = layoutStore;
+  const {
+    NAV_NAME,
+    sideNavWidth,
+    navHeight,
+    collapsed,
+    boxMinWidth,
+    bodyPadding,
+  } = layoutConfig;
   // const location = useLocation();
   // const params = useParams();
   // const navigate = useNavigate();
-  document.title = layoutConfig.NAV_NAME;
-  const navHeight = layoutConfig.navHeight;
-  const sideNavWidth = layoutConfig.sideNavWidth;
-  const collapsed = layoutConfig.collapsed;
+  document.title = NAV_NAME;
+
   useEffect(() => {
     const collapsedEvent = () => {
-      // layoutConfig.collapsed = window.innerWidth < layoutConfig.boxMinWidth;
       if (document.documentElement.offsetWidth < 1100) {
         layoutConfig.collapsed = true;
       } else {
@@ -30,34 +36,34 @@ export default function Layout() {
       window.removeEventListener("resize", collapsedEvent);
     };
   }, []);
+  const isFreePage = sideNavHide && topNavHide;
+  console.log(isFreePage, "isFreePage", sideNavHide, topNavHide);
 
   return (
     <div
       className={style.wrapper}
       style={{
-        paddingTop: layoutStore.topNavHide ? 0 : navHeight,
-        minWidth: layoutConfig.boxMinWidth,
+        paddingTop: topNavHide ? 0 : navHeight,
+        minWidth: boxMinWidth,
       }}
     >
-      {!layoutStore.sideNavHide && <Side />}
-      {!layoutStore.topNavHide && <Nav />}
+      {!sideNavHide && <Side />}
+      {!topNavHide && <Nav />}
 
       <div className={style.body}>
-        {!layoutStore.sideNavHide && (
+        {!sideNavHide && (
           <div
             className={style.sideWrapper}
             style={{ width: collapsed ? 45 : sideNavWidth }}
           ></div>
         )}
         <div className={style.bodyMain}>
-          <div>
-            {!layoutStore.topNavHide && <PublicBreadcrumb />}
-          </div>
+          <div>{!topNavHide && <PublicBreadcrumb />}</div>
           <div
             style={{
-              marginTop: layoutConfig.bodyPadding.top,
-              marginLeft: layoutConfig.bodyPadding.left,
-              marginRight: layoutConfig.bodyPadding.left,
+              marginTop: isFreePage ? 0 : bodyPadding.top,
+              marginLeft: isFreePage ? 0 : bodyPadding.left,
+              marginRight: isFreePage ? 0 : bodyPadding.left,
             }}
           >
             <Outlet />

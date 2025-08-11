@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { accessStore } from "@/store/sys";
 import { useEffect, useState } from "react";
-import { beforePageChange } from "@/router/lifeCycle";
+import { beforePageChange } from "@/router/routerGuard";
 import { Spin } from "antd";
 export const aceessControll = (location: Location) => {
   const accessName = routerAccessData[location.pathname];
@@ -35,9 +35,15 @@ export const wrapRoutesWithAuth = (routes: any) => {
         const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
           null
         );
+        const [toPath, setToPath] = useState("/login");
         const verifyAuth = async () => {
           const auth = await beforePageChange(navigate, location);
-          setIsAuthenticated(auth);
+          if (typeof auth == "string") {
+            setToPath(auth);
+            setIsAuthenticated(false);
+          } else {
+            setIsAuthenticated(auth);
+          }
         };
         useEffect(() => {
           verifyAuth();
@@ -51,8 +57,8 @@ export const wrapRoutesWithAuth = (routes: any) => {
             </div>
           );
         }
-        if (!isAuthenticated) {
-          return <Navigate to="/login" />;
+        if (!isAuthenticated && toPath != location.pathname) {
+          return <Navigate to={toPath} />;
         }
         return <>{props.children}</>;
       };

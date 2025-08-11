@@ -78,7 +78,9 @@ const PublicBreadcrumb: React.FC = () => {
       }))
     );
   }, [location]);
-
+  if (breadcrumbList.length == 0) {
+    return <></>;
+  }
   return (
     <div className="bg-fff">
       <Breadcrumb className={`pt-2m px-1 pb-1m`} items={breadcrumbList} />

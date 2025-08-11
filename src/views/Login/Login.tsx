@@ -1,5 +1,4 @@
 import { layoutConfig } from "@/layout/layoutConfig";
-import { setSideNavHide, setTopNavHide } from "@/utils/setLayout";
 import { Form, Input, Button, Card } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useState } from "react";
@@ -7,9 +6,6 @@ import { useState } from "react";
 export default function Login() {
   const { NAV_NAME } = layoutConfig;
   const [loading, setLoading] = useState(false);
-  setSideNavHide();
-  setTopNavHide();
-
   const onFinish = (values: any) => {
     console.log("登录信息:", values);
     // 这里处理登录逻辑
@@ -23,7 +19,7 @@ export default function Login() {
     <div>
       <div className="flex flex-col flex-y-c mt-1x">
         <h1 className="mb-2"> {NAV_NAME}</h1>
-        <Card className="w-4x">
+        <Card className="w-3x">
           <Form name="login" onFinish={onFinish} autoComplete="off">
             <Form.Item
               name="username"

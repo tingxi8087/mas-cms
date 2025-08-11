@@ -6,7 +6,7 @@ import { Spin } from "antd";
 import "moment/locale/zh-cn"; // 引入moment的中文语言包
 import moment from "moment";
 import { NAV_NAME } from "./layout/layoutConfig";
-import { befroeCreated } from "./router/lifeCycle";
+import { befroeCreated } from "./router/routerGuard";
 import App from "./App";
 moment.locale("zh-cn"); // 设置moment区域为中文
 console.log("#当前环境：", getENV());
