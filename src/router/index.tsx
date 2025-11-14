@@ -4,10 +4,10 @@ import { wrapRoutesWithAuth } from "@/.utils/access";
 import { getReactRouter, useLayout } from "@/.utils/routerRender";
 import Index from "@/views/index";
 import UserCurd from "@/views/UserCurd/UserCurd";
-import NoLayout from "@/views/NoLayout/NoLayout";
-import EBoxUse from "@/views/EBoxUse/EBoxUse";
-import AccessPage from "@/views/AccessPage/AccessPage";
-import Login from "@/views/Login/Login";
+import NoLayout from "@/views/NoLayout";
+import EBoxUse from "@/views/EBoxUse";
+import AccessPage from "@/views/AccessPage";
+import Login from "@/views/Login";
 import Page403 from "@/views/403";
 import Page404 from "@/views/404";
 
