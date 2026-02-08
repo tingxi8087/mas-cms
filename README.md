@@ -1,48 +1,118 @@
-# mas-cms
+# MAS-CMS
 
-一个基于 react+ts+vite 进行简单封装的后台管理系统
+基于 React + Vite + Ant Design 的内容管理后台前端项目。
 
-## 集成库官网地址：
+## 技术栈
 
-react-router-dom: [https://reactrouter.com/en/main]()
+- **框架**: React 18
+- **构建**: Vite 5
+- **语言**: TypeScript
+- **UI**: Ant Design 5、Ant Design Pro Components、Pro Layout
+- **路由**: React Router 6（Hash 模式）
+- **样式**: Less
+- **请求**: Axios
+- **其他**: e-boxes、mas-encrypt、react-quill（富文本）
 
-eboxes: [https://github.com/nanxiaobei/resso](https://github.com/tingxi8087/e-boxes)
+## 环境要求
 
-antd: [https://ant.design/index-cn]()
+- Node.js 18+
+- 推荐使用 [Bun](https://bun.sh/) 或 npm/cnpm 安装依赖
 
+## 快速开始
 
-## 待开发：
+### 安装依赖
 
-权限控制 √ 登录页 √ .vscode 配置 √
+```bash
+# 使用 bun
+bun install
 
-待优化项
+# 或使用 cnpm
+cnpm install
+```
 
-1\.环境变量优化 已完成
+### 开发
 
-2\.引入组件报错优化 已完成
+```bash
+# 开发环境（.env.dev）
+bun run start
+# 或
+npm run start
 
-3\.文件命名规范 已完成
+# 生产模式配置下的开发（.env.pro）
+bun run start:pro
+```
 
-4\.axios 请求创建方式 已完成
+### 构建
 
-5\.获取环境变量方法 已完成
+```bash
+# 生产构建
+bun run build
+# 或
+npm run build
 
-6\.打包跳过检查 已完成
+# 开发环境配置构建
+bun run build:dev
+```
 
-pro 报错忽略 已完成
+### 预览构建产物
 
-tab 默认展开项 已完成
+```bash
+bun run preview
+# 或
+npm run preview
+```
 
-手机自适应
+## 项目结构
 
-最小宽度 已完成
+```
+src/
+├── .utils/          # 路由渲染、权限包装等工具
+├── assets/          # 静态资源
+├── components/      # 公共组件（如富文本编辑器、面包屑）
+├── http/            # 请求封装
+├── layout/          # 布局（侧栏、顶栏、个人菜单等）
+├── mock/            # 本地 mock
+├── router/          # 路由配置与守卫
+├── store/           # 状态管理
+├── theme.less       # 主题变量
+├── typings/         # 类型声明
+├── utils/           # 通用工具
+└── views/           # 页面视图
+    ├── Login/       # 登录
+    ├── index/       # 首页
+    ├── UserCurd/    # 用户 CRUD 示例
+    ├── EBoxUse/     # eBoxes 使用示例
+    ├── AccessPage/  # 权限示例页
+    ├── NoLayout/    # 无布局页
+    ├── 403.tsx      # 无权限
+    └── 404.tsx      # 未找到
+```
 
-布局优化，变量统一控制 已完成
+## 功能概览
 
-自适应 Table
+- **布局**: 可折叠侧栏 + 顶栏，基于 e-boxes 配置（`layoutConfig`）
+- **路由**: Hash 路由，支持菜单配置（label、path、icon、hideMenu、access）
+- **权限**: 通过 `access` 控制菜单与页面访问（如 `admin`）
+- **示例**: 用户管理 CRUD、权限页、eBoxes 使用、无布局页、403/404
 
-命名规范 已完成
+## 配置说明
 
-权限管理重写 已完成
+- **开发环境**: 使用 `.env.dev`，运行 `start` 或 `build:dev`
+- **生产环境**: 使用 `.env.pro`，运行 `start:pro` 或 `build`
+- **路径别名**: `@` 指向 `src/`
+- **构建输出**: `base: "./"`，适用于相对路径部署
 
-前置守卫 已完成
+## 脚本说明
+
+| 命令           | 说明                     |
+|----------------|--------------------------|
+| `start`       | 开发服务器（dev 环境）   |
+| `start:pro`   | 开发服务器（pro 环境）   |
+| `build`       | 生产构建                 |
+| `build:dev`   | 开发配置构建             |
+| `preview`     | 预览构建结果             |
+| `lint`        | ESLint 检查              |
+
+## License
+
+见 [LICENSE](./LICENSE) 文件。
