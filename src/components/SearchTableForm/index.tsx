@@ -504,7 +504,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
         // 点击埋点处理函数
         const handleClickReport = () => {
           const currentValue = form.getFieldValue(name);
-          dataReport?.customClickReport(
+          dataReport(
             pageId,
             `${eventId}_click`,
             {
@@ -785,7 +785,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
       // 查询按钮点击埋点
       if (pageId && clstagId) {
         const eventId = `${clstagId}_search`;
-        dataReport?.customClickReport(
+        dataReport(
           pageId,
           eventId,
           {
@@ -801,7 +801,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
       // 重置按钮点击埋点
       if (pageId && clstagId) {
         const eventId = `${clstagId}_reset`;
-        dataReport?.customClickReport(
+        dataReport(
           pageId,
           eventId,
           {
@@ -819,7 +819,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
     const handleFieldSettingClick = () => {
       if (pageId && clstagId) {
         const eventId = `${clstagId}_fieldSetting`;
-        dataReport?.customClickReport(
+        dataReport(
           pageId,
           eventId,
           {
@@ -839,7 +839,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
     const handleToggleExpandedClick = () => {
       if (pageId && clstagId) {
         const eventId = `${clstagId}_expandToggle`;
-        dataReport?.customClickReport(
+        dataReport(
           pageId,
           eventId,
           {
@@ -964,12 +964,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
             onCancel={() => {
               if (pageId && clstagId) {
                 const eventId = `${clstagId}_fieldSettingCancel`;
-                dataReport?.customClickReport(
-                  pageId,
-                  eventId,
-                  { needJSON: true },
-                  {},
-                );
+                dataReport(pageId, eventId, { needJSON: true }, {});
               }
               setFieldSettingOpen(false);
             }}
@@ -977,7 +972,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
               const nextOrder = next.map((it) => it.field);
               if (pageId && clstagId) {
                 const eventId = `${clstagId}_fieldSettingOk`;
-                dataReport?.customClickReport(
+                dataReport(
                   pageId,
                   eventId,
                   {
