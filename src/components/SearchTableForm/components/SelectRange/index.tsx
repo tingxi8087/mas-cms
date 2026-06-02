@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import { Select } from 'antd';
+import { Select, SelectProps } from 'antd';
 
 import { FormFieldOption } from '../../index';
 
@@ -19,7 +19,7 @@ export interface SelectRangeInputProps {
   onChange?: (value?: SelectRangeValue) => void; // 值变化回调
   placeholder?: SelectRangePlaceholder; // 占位符
   options?: FormFieldOption[]; // 下拉选项
-  itemProps?: React.ComponentProps<typeof Select>; // Select 属性
+  itemProps?: SelectProps<string | number | null, FormFieldOption>; // Select 属性
   valueFormatter?: (value: SelectRangeValue) => SelectRangeValue; // 值格式化
 }
 
@@ -87,7 +87,7 @@ const SelectRange: React.FC<SelectRangeInputProps> = ({
   };
 
   // 共享属性
-  const sharedProps: React.ComponentProps<typeof Select> = {
+  const sharedProps: SelectProps<string | number | null, FormFieldOption> = {
     allowClear: true,
     showSearch: true,
     optionFilterProp: 'label',
@@ -117,4 +117,3 @@ const SelectRange: React.FC<SelectRangeInputProps> = ({
 };
 
 export default SelectRange;
-

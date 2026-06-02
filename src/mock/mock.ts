@@ -263,6 +263,7 @@ export const getStudentHttp = (
         student.like.toLowerCase().includes(like.toLowerCase())
       );
     }
+    const total = filteredData.length;
     // Calculate the start and end index based on pagination parameters
     const startIndex = (pageNum - 1) * pageSize;
     const endIndex = startIndex + pageSize;
@@ -274,7 +275,7 @@ export const getStudentHttp = (
         status: 1,
         data: {
           list: paginatedData,
-          total: dataSource.length,
+          total,
           pageNum,
           pageSize,
         },

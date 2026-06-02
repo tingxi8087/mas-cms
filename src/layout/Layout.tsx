@@ -1,7 +1,7 @@
 import style from "./index.module.less";
 import Nav from "./Nav";
 import Side from "./Side";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { layoutStore } from "@/store/sys";
 import { layoutConfig } from "./layoutConfig";
 import { useEffect } from "react";

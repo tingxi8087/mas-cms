@@ -171,31 +171,24 @@ const SelectAsync: React.FC<ISelectAsync> = ({
         return document.body;
       }}
       onSearch={handleSearch}
-      onOpenChange={handleDropdownVisibleChange}
+      onDropdownVisibleChange={handleDropdownVisibleChange}
       filterOption={false} // 禁用默认过滤，使用自定义搜索
       notFoundContent={null}
       {...restProps}
-      classNames={{
-        popup: {
-          root: restProps?.classNames?.popup?.root
-            ? `${restProps?.classNames?.popup?.root} ${styles.forceBottom}`
-            : styles.forceBottom
-        }
-      }}
+      popupClassName={
+        restProps?.popupClassName
+          ? `${restProps.popupClassName} ${styles.forceBottom}`
+          : styles.forceBottom
+      }
       placement={restProps?.placement || 'bottomLeft'} // 强制向下展开，避免向上展开导致看不全数据，但允许外部覆盖
-      styles={{
-        ...(restProps?.styles || {}),
-        root: {
-          maxWidth: popupMaxWidth,
-          ...(restProps.styles?.root || {})
-        },
-        popup: {
-          root: {
-            maxHeight: 400,
-            overflow: 'auto',
-            ...restProps?.styles?.popup?.root
-          }
-        }
+      style={{
+        ...restProps.style,
+        maxWidth: popupMaxWidth || restProps.style?.maxWidth
+      }}
+      dropdownStyle={{
+        maxHeight: 400,
+        overflow: 'auto',
+        ...restProps.dropdownStyle
       }}
     >
       {renderOptions()}

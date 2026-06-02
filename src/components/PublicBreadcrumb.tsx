@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Breadcrumb, Card } from "antd";
+import { Breadcrumb } from "antd";
 import { getMenuRouter } from "@/.utils/routerRender";
 import { RouterIndex } from "@/router";
 import { useLocation, useNavigate } from "react-router-dom";

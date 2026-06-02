@@ -3,7 +3,7 @@ import { Navigate, createHashRouter } from "react-router-dom";
 import { wrapRoutesWithAuth } from "@/.utils/access";
 import { getReactRouter, useLayout } from "@/.utils/routerRender";
 import Index from "@/views/index";
-import UserCurd from "@/views/UserCurd/UserCurd";
+import UserCurd from "@/views/UserCurd";
 import NoLayout from "@/views/NoLayout";
 import EBoxUse from "@/views/EBoxUse";
 import AccessPage from "@/views/AccessPage";

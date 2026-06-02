@@ -14,8 +14,13 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.1.4",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "antd": "^5.6.0",
     "axios": "^1.4.0",
+    "dayjs": "^1.11.21",
     "e-boxes": "^0.0.2",
     "lodash": "^4.17.21",
     "mas-encrypt": "^1.0.2",
