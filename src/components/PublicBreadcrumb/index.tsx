@@ -3,7 +3,7 @@ import { Breadcrumb } from "antd";
 import { getMenuRouter } from "@/.utils/routerRender";
 import { RouterIndex } from "@/router";
 import { useLocation, useNavigate } from "react-router-dom";
-import styles from "./PublicBreadcrumb.module.less";
+import styles from "./index.module.less";
 function findLabels(data: any, path: any) {
   const labels: any[] = [];
   function traverse(nodes: any, path: string | any[]) {

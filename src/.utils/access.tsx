@@ -1,23 +1,27 @@
 import { routerAccessData } from "../router/index";
 import {
-  Location,
   Navigate,
-  NavigateFunction,
   useLocation,
   useNavigate,
 } from "react-router-dom";
+import type { Location, NavigateFunction } from "react-router-dom";
 import { accessStore } from "@/store/sys";
 import { useEffect, useState } from "react";
 import { beforePageChange } from "@/router/routerGuard";
 import { Spin } from "antd";
+
+export type AccessCode = string | string[] | undefined | null;
+
+export const hasAccess = (code: AccessCode) => {
+  if (!code) return true;
+  const accessList = accessStore.$?.list || accessStore.list || [];
+  const codeList = Array.isArray(code) ? code : [code];
+  return codeList.some((item) => accessList.includes(item));
+};
+
 export const aceessControll = (location: Location) => {
   const accessName = routerAccessData[location.pathname];
-  if (!accessName) return true;
-  if (accessName && accessStore.list.includes(accessName)) {
-    return true;
-  } else {
-    return false;
-  }
+  return hasAccess(accessName);
 };
 export const aceessValid = (location: Location, navigate: NavigateFunction) => {
   if (!aceessControll(location) && location.pathname != "/403") {
@@ -50,10 +54,15 @@ export const wrapRoutesWithAuth = (routes: any) => {
         }, []);
         if (isAuthenticated === null) {
           return (
-            <div className="rel" style={{ height: "calc(100vh - 85px)" }}>
-              <div className="h-3 abs flex left-50-pct top-50-pct translate--50-pct flex flex-col flex-x-c flex-y-c">
-                <Spin size="large" />
-              </div>
+            <div
+              style={{
+                height: "calc(100vh - 85px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Spin size="large" />
             </div>
           );
         }

@@ -6,7 +6,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
  * @param defaultValue 默认值
  * @returns [state, setState] 与useState相同的返回值
  */
-// eslint-disable-next-line space-before-function-paren
 function useStoredState<T>(key: string, defaultValue: T): [T, (value: T | ((prevState: T) => T)) => void] {
   // 从localStorage获取初始值
   const getStoredValue = (): T => {

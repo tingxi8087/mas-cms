@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { Button, Form, Input, InputNumber, Modal } from "antd";
 
-import styles from "./UserFormModal.module.less";
+import styles from "./index.module.less";
 
 export type UserFormModalMode = "add" | "edit";
 

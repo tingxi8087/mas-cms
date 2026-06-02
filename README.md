@@ -154,9 +154,38 @@ export const layoutConfig = eBox({
 建议：
 
 - 页面入口优先使用目录下的 `index.tsx`，路由中写 `@/views/UserCurd`。
-- 页面私有子组件放进当前页面目录的 `components/`，例如 `src/views/UserCurd/components/UserFormModal.tsx`。
+- 页面私有子组件放进当前页面目录的 `components/`，例如 `src/views/UserCurd/components/UserFormModal/index.tsx`。
 - 子路由较多时，按业务模块建立目录。
 - 不要把复杂页面逻辑写进路由文件，路由只做配置。
+
+## 组件目录规范
+
+标准 React 组件统一使用目录式结构：
+
+```text
+ComponentName/
+├── index.tsx          # 组件入口
+├── index.module.less  # 组件私有样式
+└── components/        # 当前组件的私有子组件；没有子组件时不要创建
+```
+
+使用建议：
+
+- 公共组件放在 `src/components/ComponentName`。
+- 页面私有组件放在 `src/views/PageName/components/ComponentName`。
+- layout 私有组件放在 `src/layout/components/ComponentName`。
+- 组件对外只暴露目录入口，导入时写 `@/components/Access` 或 `./components/UserFormModal`。
+- 组件样式优先写在本组件自己的 `index.module.less`，不要依赖父组件样式。
+- 组件内部继续拆分时，才创建当前组件的 `components/`，不要平铺到父级目录。
+- 没有子组件时不创建空的 `components/`，目录保持轻量。
+
+当前示例：
+
+- `src/components/SearchTableForm`
+- `src/components/Access`
+- `src/components/PublicBreadcrumb`
+- `src/layout/components/Nav`
+- `src/views/UserCurd/components/UserFormModal`
 
 ## 页面开发推荐写法
 
@@ -191,6 +220,37 @@ return (
 - 查询参数提交前要清理空值，避免把 `undefined`、`null`、空字符串传给接口。
 - 页面内样式使用 `index.module.less`，不要使用远程 CSS 工具类。
 - 操作按钮放在列表 Card 的顶部或单独 Card 中，保持页面层级清晰。
+
+## 请求层规范
+
+请求统一从 `src/http` 引入：
+
+```ts
+import { request, mRequest, createHttpClient } from "@/http";
+```
+
+兼容旧路径：
+
+```ts
+import { request } from "@/http/request";
+import { mRequest } from "@/http/mRequest";
+```
+
+当前约定：
+
+- `createHttpClient(options)` 用于创建统一配置的 axios 实例。
+- 默认 `baseURL` 读取 `VITE_API_BASE_URL`，默认 `timeout` 为 `15000`。
+- 请求拦截器只保留认证扩展点，默认不强制注入 token 或 cookie。
+- 响应默认返回 `response.data`，业务页面不需要再手动拆 axios response。
+- `401` 提示登录失效，`403` 提示无权限，`500` 提示服务器异常，其他错误展示接口返回的 `message/msg/error`。
+- `mRequest` 保留 mock/业务状态提示：当返回值 `status === 0` 且 `data` 是字符串时自动 `message.error`。
+
+建议：
+
+- 业务页面不要直接 `Axios.create()`，优先复用 `request` / `mRequest`。
+- 新增特殊服务端地址时，用 `createHttpClient({ baseURL })` 创建实例。
+- 登录态可能是 cookie、Bearer token、自定义 header 或签名参数，模板不预设方案。
+- 接入认证时集中改 `prepareRequestConfig` 或传入 axios options，例如 cookie 场景可按项目需要配置 `withCredentials`。
 
 ## SearchTableForm 使用
 
@@ -406,7 +466,57 @@ export const accessStore = eBox<any>({ list: [] });
 
 - 权限字段保持稳定，例如统一使用 `admin`、`user:create`、`user:delete` 这类可读 key。
 - 菜单级权限放路由配置，按钮级权限在页面内部判断。
-- 不要把权限判断散落成大量字符串判断，可以逐步封装成 `hasAccess("xxx")` 这类工具函数。
+- 不要把权限判断散落成大量字符串判断，统一使用 `hasAccess`、`useAccess` 或 `Access` 组件。
+
+### 按钮级权限
+
+按钮权限和路由权限共用 `accessStore.list`。路由配置里的 `access` 仍负责页面是否可进入；页面内部按钮、操作列、批量操作等使用按钮级权限。
+
+工具函数：
+
+```ts
+import { hasAccess } from "@/.utils/access";
+
+const canCreate = hasAccess("user:create");
+const canUseAny = hasAccess(["admin", "user:create"]);
+```
+
+Hook：
+
+```tsx
+import { useAccess } from "@/hooks/useAccess";
+
+export default function Toolbar() {
+  const canCreate = useAccess("user:create");
+
+  return <Button disabled={!canCreate}>新增</Button>;
+}
+```
+
+组件：
+
+```tsx
+import Access from "@/components/Access";
+
+<Access code="user:create">
+  <Button type="primary">新增</Button>
+</Access>;
+
+<Access code="user:delete" fallback={<Button disabled>无权限</Button>}>
+  <Button danger>删除</Button>
+</Access>;
+
+<Access code="user:delete" mode="disabled">
+  <Button danger>删除</Button>
+</Access>;
+```
+
+使用建议：
+
+- 单个按钮是否展示，用 `Access`。
+- 操作列里需要计算多个按钮状态，用 `useAccess`。
+- 非 React 逻辑或路由工具里，用 `hasAccess`。
+- `mode="hidden"` 是默认行为；需要保留按钮位置时使用 `mode="disabled"`。
 
 ### layoutConfig
 
@@ -929,7 +1039,7 @@ const normalizeSearchParams = (values: FormValues) => {
 
 业务弹窗优先按 `.agent/skills/react-modal-creator` 的模式实现。弹窗组件不接收 props，由组件内部维护可见状态、表单状态和提交 loading；页面只持有 ref，并通过 `open(config): void` 传入标题、初始值和事件回调。
 
-用户管理页的 `src/views/UserCurd/components/UserFormModal.tsx` 是当前示例：
+用户管理页的 `src/views/UserCurd/components/UserFormModal/index.tsx` 是当前示例：
 
 - 弹窗组件使用 `forwardRef<UserFormModalRef, {}>`，不声明业务 props。
 - `UserFormModalRef` 必须包含带 JSDoc 的 `open(config): void` 方法。

@@ -1,13 +1,13 @@
-import style from "../index.module.less";
 import React, { useEffect, useState } from "react";
 import type { MenuProps } from "antd";
 import { Button, Menu, Tooltip } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getMenuRouter } from "@/.utils/routerRender";
 import { RouterIndex } from "@/router";
-import { ItemType, MenuItemType } from "antd/es/menu/interface";
-import { layoutConfig } from "../layoutConfig";
+import type { ItemType, MenuItemType } from "antd/es/menu/interface";
+import { layoutConfig } from "../../layoutConfig";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import styles from "./index.module.less";
 // 要自定义菜单改这个就好
 const navList: ItemType<MenuItemType>[] | undefined = undefined;
 const Side: React.FC = () => {
@@ -37,9 +37,9 @@ const Side: React.FC = () => {
   }, [location]);
 
   return (
-    <div className={style.side}>
+    <div className={styles.side}>
       <Menu
-        className={style.sideMenu}
+        className={styles.sideMenu}
         onClick={onClick}
         onOpenChange={onOpenChange}
         style={{
@@ -55,7 +55,7 @@ const Side: React.FC = () => {
         inlineCollapsed={collapsed}
       />
       <div
-        className={style.sideFooter}
+        className={styles.sideFooter}
         style={{
           width: collapsed ? 45 : sideNavWidth,
         }}
@@ -63,7 +63,7 @@ const Side: React.FC = () => {
         <Tooltip title={collapsed ? "展开菜单" : "收起菜单"}>
           <Button
             type="text"
-            className={style.collapseButton}
+            className={styles.collapseButton}
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => (layoutConfig.collapsed = !collapsed)}
           />

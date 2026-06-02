@@ -1,41 +1,3 @@
-.nav {
-  background: linear-gradient(90deg, #0b1f2a, #123141);
-  box-sizing: border-box;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-weight: 600;
-  justify-content: space-between;
-  grid-area: nav;
-  z-index: 99;
-  min-width: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 24px rgba(11, 31, 42, 0.16);
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-.brandMark {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #d99742;
-  color: #0b1f2a;
-  font-weight: 800;
-  letter-spacing: 0;
-}
-.brandText {
-  color: #f7fbfc;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0;
-}
 .wrapper {
   background:
     repeating-linear-gradient(
@@ -51,28 +13,6 @@
   height: 100vh;
   min-height: 100vh;
   overflow: hidden;
-}
-.side {
-  grid-area: side;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  background: #fbfcfd;
-  z-index: 5;
-  border-right: 1px solid #dfe6ea;
-}
-.sideFooter {
-  flex: 0 0 32px;
-  height: 32px;
-  box-sizing: border-box;
-  color: #5d6970;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  border-top: 1px solid #e7edf0;
-  background: #f7fafb;
 }
 .bodyMain {
   grid-area: main;
@@ -91,50 +31,4 @@
 }
 .pageContent {
   margin-top: 8px;
-}
-
-.personMenu {
-  cursor: pointer;
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-}
-.personAvatar {
-  background-color: #d99742;
-  color: #0b1f2a;
-}
-.personName {
-  color: #f7fbfc;
-  font-size: 13px;
-  font-weight: 600;
-}
-.sideMenu {
-  border-inline-end: 0 !important;
-  background: transparent;
-
-  :global {
-    .ant-menu-item,
-    .ant-menu-submenu-title {
-      margin: 4px 8px;
-      width: calc(100% - 16px);
-      border-radius: 8px;
-      color: #31424d;
-    }
-
-    .ant-menu-item-selected {
-      background: #e8f1f3;
-      color: #0b5c6b;
-      font-weight: 600;
-    }
-
-    .ant-menu-item-selected::after {
-      display: none;
-    }
-  }
-}
-.collapseButton {
-  width: 28px;
-  height: 28px;
-  color: #5d6970;
 }

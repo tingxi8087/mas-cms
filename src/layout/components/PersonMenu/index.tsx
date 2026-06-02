@@ -3,7 +3,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { Avatar, MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
 import { useNavigate } from "react-router-dom";
-import style from "../index.module.less";
+import styles from "./index.module.less";
 
 const PersonMenu: React.FC = () => {
   const navigate = useNavigate();
@@ -17,14 +17,14 @@ const PersonMenu: React.FC = () => {
     },
   ];
   return (
-    <div className={style.personMenu}>
+    <div className={styles.personMenu}>
       <Dropdown menu={{ items }} placement="bottom">
         <Space>
           <Avatar
-            className={style.personAvatar}
+            className={styles.personAvatar}
             icon={<UserOutlined />}
           />
-          <span className={style.personName}>admin</span>
+          <span className={styles.personName}>admin</span>
         </Space>
       </Dropdown>
     </div>
