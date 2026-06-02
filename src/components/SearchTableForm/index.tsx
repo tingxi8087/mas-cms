@@ -871,7 +871,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
                 className={styles.fieldSettingButton}
                 onClick={handleFieldSettingClick}
               >
-                <SettingOutlined className={styles.fieldSettingIcon} />
+                <SettingOutlined />
               </Button>
             </Tooltip>
           )}
@@ -901,6 +901,7 @@ const SearchTableForm = forwardRef<TableFormRef, TableFormProps>(
         style={
           {
             "--expand-label-width": expandLabelWidth,
+            "--col-padding-left": expanded ? "0px" : "8px",
           } as React.CSSProperties
         }
         initialValues={initialValues}
