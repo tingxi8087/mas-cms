@@ -14,6 +14,7 @@ export default function Layout() {
     sideNavWidth,
     navHeight,
     collapsed,
+    boxMinWidth,
     bodyPadding,
   } = layoutConfig;
   document.title = NAV_NAME;
@@ -50,6 +51,7 @@ export default function Layout() {
     <div
       className={style.wrapper}
       style={{
+        minWidth: boxMinWidth,
         gridTemplateRows,
         gridTemplateColumns,
         gridTemplateAreas,

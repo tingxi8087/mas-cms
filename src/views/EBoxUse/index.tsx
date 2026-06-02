@@ -7,10 +7,12 @@ const state = eBox({
 });
 
 export default function eBoxUse() {
+  const { count } = state;
+
   return (
     <Card>
       <div>用eBoxes进行局部状态管理</div>
-      <div className={styles.count}>num:{state.count}</div>
+      <div className={styles.count}>num:{count}</div>
       <Button
         onClick={() => {
           state.count++;

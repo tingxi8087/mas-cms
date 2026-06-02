@@ -10,12 +10,13 @@ import {
   message,
 } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./index.module.less";
 import SearchTableForm, {
   FormFieldConfig,
   FormValues,
 } from "@/components/SearchTableForm";
+import { useElementBottomDistance } from "@/hooks/useElementBottomDistance";
 import { useBasePageTable } from "@/hooks/openDobuleTableHooks";
 import {
   addStudentHttp,
@@ -38,6 +39,11 @@ type StudentSearchParams = Partial<
 
 type ModalMode = "add" | "edit";
 
+const CARD_GAP = 16;
+const PAGE_BOTTOM_PADDING = 16;
+const TABLE_HEIGHT_SAFE_OFFSET = 8;
+const MIN_TABLE_SCROLL_Y = 80;
+
 const normalizeSearchParams = (values: FormValues): StudentSearchParams => {
   return Object.entries(values).reduce<StudentSearchParams>(
     (params, [key, value]) => {
@@ -52,10 +58,21 @@ const normalizeSearchParams = (values: FormValues): StudentSearchParams => {
 
 const UserCurd = () => {
   const [form] = Form.useForm<Student>();
+  const searchCardRef = useRef<HTMLDivElement>(null);
+  const tableCardRef = useRef<HTMLDivElement>(null);
+  const optionsHeaderRef = useRef<HTMLDivElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>("add");
   const [editingRecord, setEditingRecord] = useState<Student>();
   const [saving, setSaving] = useState(false);
+  const [tableScrollY, setTableScrollY] = useState(MIN_TABLE_SCROLL_Y);
+  const observedRefs = useMemo(() => [tableCardRef, optionsHeaderRef], []);
+  const {
+    distance: searchCardBottomDistance,
+    version: layoutVersion,
+  } = useElementBottomDistance(searchCardRef, {
+    extraRefs: observedRefs,
+  });
 
   const searchFields = useMemo<FormFieldConfig[]>(
     () => [
@@ -239,31 +256,74 @@ const UserCurd = () => {
     },
   ];
 
-  return (
-    <div>
-      <Card size="small" style={{ marginBottom: 12 }}>
-        <SearchTableForm
-          fields={searchFields}
-          value={searchParams}
-          onFinish={(values) => setSearchParams(normalizeSearchParams(values))}
-          onReset={() => setSearchParams({})}
-          enableFieldSetting
-          fieldSettingCacheKey="user-curd-search-fields"
-        />
-      </Card>
+  useEffect(() => {
+    const getOuterHeight = (element?: Element | null) => {
+      if (!element) return 0;
+      const rect = element.getBoundingClientRect();
+      const style = window.getComputedStyle(element);
+      return (
+        rect.height +
+        parseFloat(style.marginTop || "0") +
+        parseFloat(style.marginBottom || "0")
+      );
+    };
 
-      <Card size="small">
-        <div className={styles.optionsHeader}>
-          <Button type="primary" onClick={openAddModal}>
-            添加用户
-          </Button>
-        </div>
+    const getVerticalPadding = (element?: Element | null) => {
+      if (!element) return 0;
+      const style = window.getComputedStyle(element);
+      return (
+        parseFloat(style.paddingTop || "0") +
+        parseFloat(style.paddingBottom || "0")
+      );
+    };
+
+    const tableCard = tableCardRef.current;
+    const cardBody = tableCard?.querySelector(".ant-card-body");
+    const tableHeader = tableCard?.querySelector(".ant-table-thead");
+    const pagination = tableCard?.querySelector(".ant-pagination");
+
+    const nextTableScrollY =
+      searchCardBottomDistance -
+      CARD_GAP -
+      PAGE_BOTTOM_PADDING -
+      TABLE_HEIGHT_SAFE_OFFSET -
+      getVerticalPadding(cardBody) -
+      getOuterHeight(optionsHeaderRef.current) -
+      getOuterHeight(tableHeader) -
+      getOuterHeight(pagination);
+
+    setTableScrollY(Math.max(MIN_TABLE_SCROLL_Y, Math.floor(nextTableScrollY)));
+  }, [layoutVersion, searchCardBottomDistance, tableData.length, total]);
+
+  return (
+    <div className={styles.page}>
+      <div ref={searchCardRef} className={styles.searchCard}>
+        <Card size="small">
+          <SearchTableForm
+            fields={searchFields}
+            value={searchParams}
+            onFinish={(values) => setSearchParams(normalizeSearchParams(values))}
+            onReset={() => setSearchParams({})}
+            enableFieldSetting
+            fieldSettingCacheKey="user-curd-search-fields"
+          />
+        </Card>
+      </div>
+
+      <div ref={tableCardRef}>
+        <Card size="small" className={styles.tableCard}>
+          <div ref={optionsHeaderRef} className={styles.optionsHeader}>
+            <Button type="primary" onClick={openAddModal}>
+              添加用户
+            </Button>
+          </div>
         <Table
           rowKey="id"
           columns={columns}
           dataSource={tableData}
           loading={loading}
           size="small"
+          scroll={{ y: tableScrollY }}
           pagination={{
             current: pageNum,
             pageSize,
@@ -275,6 +335,7 @@ const UserCurd = () => {
           onChange={handleTableChange}
         />
       </Card>
+      </div>
 
       <Modal
         title={modalMode === "add" ? "添加用户" : "编辑用户"}
