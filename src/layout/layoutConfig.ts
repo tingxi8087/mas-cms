@@ -4,12 +4,12 @@ export const NAV_NAME = "mas-cms";
 export const layoutConfig = eBox({
   NAV_NAME,
   navHeight: 50,
-  navPadding: 15,
+  navPadding: 16,
   sideNavWidth: 200,
   boxMinWidth: 1200,
   collapsed: false,
   bodyPadding: {
-    top: 15,
-    left: 15,
+    top: 16,
+    left: 16,
   },
 });
