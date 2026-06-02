@@ -14,12 +14,8 @@ export default function Layout() {
     sideNavWidth,
     navHeight,
     collapsed,
-    boxMinWidth,
     bodyPadding,
   } = layoutConfig;
-  // const location = useLocation();
-  // const params = useParams();
-  // const navigate = useNavigate();
   document.title = NAV_NAME;
 
   useEffect(() => {
@@ -37,39 +33,44 @@ export default function Layout() {
     };
   }, []);
   const isFreePage = sideNavHide && topNavHide;
-  console.log(isFreePage, "isFreePage", sideNavHide, topNavHide);
+  const gridTemplateRows = topNavHide ? "1fr" : `${navHeight}px 1fr`;
+  const gridTemplateColumns = sideNavHide
+    ? "1fr"
+    : `${collapsed ? 45 : sideNavWidth}px 1fr`;
+  const gridTemplateAreas =
+    topNavHide && sideNavHide
+      ? `"main"`
+      : topNavHide
+      ? `"side main"`
+      : sideNavHide
+      ? `"nav" "main"`
+      : `"nav nav" "side main"`;
 
   return (
     <div
       className={style.wrapper}
       style={{
-        paddingTop: topNavHide ? 0 : navHeight,
-        minWidth: boxMinWidth,
+        gridTemplateRows,
+        gridTemplateColumns,
+        gridTemplateAreas,
       }}
     >
       {!sideNavHide && <Side />}
       {!topNavHide && <Nav />}
 
-      <div className={style.body}>
-        {!sideNavHide && (
-          <div
-            className={style.sideWrapper}
-            style={{ width: collapsed ? 45 : sideNavWidth }}
-          ></div>
-        )}
-        <div className={style.bodyMain}>
-          <div>{!topNavHide && <PublicBreadcrumb />}</div>
-          <div
-            style={{
-              marginTop: isFreePage ? 0 : bodyPadding.top,
-              marginLeft: isFreePage ? 0 : bodyPadding.left,
-              marginRight: isFreePage ? 0 : bodyPadding.left,
-            }}
-          >
-            <Outlet />
-          </div>
+      <main
+        className={style.bodyMain}
+        style={{
+          padding: isFreePage
+            ? 0
+            : `${bodyPadding.top}px ${bodyPadding.left}px`,
+        }}
+      >
+        {!topNavHide && <PublicBreadcrumb />}
+        <div className={style.pageContent}>
+          <Outlet />
         </div>
-      </div>
+      </main>
     </div>
   );
 }

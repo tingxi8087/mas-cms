@@ -1,6 +1,5 @@
 .nav {
   background-color: #001529;
-  height: 50px;
   box-sizing: border-box;
   color: white;
   display: flex;
@@ -8,41 +7,45 @@
   padding: 0 16px;
   font-weight: 600;
   justify-content: space-between;
-  position: fixed;
+  grid-area: nav;
   z-index: 99;
-  width: 100%;
-  top: 0;
-  left: 0;
+  min-width: 0;
 }
 .wrapper {
   background-color: #f0f2f5;
-  // width: 100vw;
   box-sizing: border-box;
+  display: grid;
+  height: 100vh;
   min-height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .side {
-  left: 0;
-  position: fixed;
-  overflow: auto;
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   background-color: #fff;
   z-index: 5;
-  // top: 50px;
-  // height: calc(100vh - 50px);
 }
-.body {
+.sideFooter {
+  flex: 0 0 32px;
+  height: 32px;
+  box-sizing: border-box;
+  color: #888;
+  cursor: pointer;
   display: flex;
-  // padding-right: 15px;
-}
-.sideWrapper {
-  // width: 205px;
-  // margin-right: 15px;
-  height: 10px;
+  align-items: center;
+  padding: 0 12px;
+  border-top: 1px solid #f0f0f0;
 }
 .bodyMain {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-  // transition: all 1s;
+  grid-area: main;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  box-sizing: border-box;
+}
+.pageContent {
+  margin-top: 15px;
 }

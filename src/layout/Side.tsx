@@ -16,7 +16,7 @@ const Side: React.FC = () => {
   const location = useLocation();
   const list = navList || getMenuRouter(RouterIndex);
   const navigate = useNavigate();
-  const { sideNavWidth, navHeight,collapsed } = layoutConfig;
+  const { sideNavWidth, collapsed } = layoutConfig;
   const onClick: MenuProps["onClick"] = (e) => {
     navigate(e.key);
     setSelected([e.key]);
@@ -37,16 +37,15 @@ const Side: React.FC = () => {
   }, [location]);
 
   return (
-    <div
-      className={style.side}
-      style={{ height: `calc(100vh - ${navHeight}px)` }}
-    >
+    <div className={style.side}>
       <Menu
         onClick={onClick}
         onOpenChange={onOpenChange}
         style={{
           width: collapsed ? 45 : sideNavWidth,
-          minHeight: "calc(100% - 32px)",
+          flex: 1,
+          minHeight: 0,
+          overflow: "auto",
         }}
         openKeys={openKeys}
         selectedKeys={selected}
@@ -54,15 +53,13 @@ const Side: React.FC = () => {
         items={list}
         inlineCollapsed={collapsed}
       />
-      <div style={{ width: "100%", height: 32 }}></div>
       <div
-        className="fixed bottom-0 left-0 right-0 h-32 color-888 font-16px pointer py-1m px-1"
+        className={style.sideFooter}
         style={{
           width: collapsed ? 45 : sideNavWidth,
-          boxSizing: "border-box",
         }}
       >
-        <MenuUnfoldOutlined onClick={() => layoutConfig.collapsed = !collapsed} />
+        <MenuUnfoldOutlined onClick={() => (layoutConfig.collapsed = !collapsed)} />
       </div>
     </div>
   );
