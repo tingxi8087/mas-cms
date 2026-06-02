@@ -39,10 +39,8 @@ type StudentSearchParams = Partial<
 
 type ModalMode = "add" | "edit";
 
-const CARD_GAP = 16;
-const PAGE_BOTTOM_PADDING = 16;
-const TABLE_HEIGHT_SAFE_OFFSET = 8;
 const MIN_TABLE_SCROLL_Y = 80;
+const TABLE_SCROLL_OFFSET = 169;
 
 const normalizeSearchParams = (values: FormValues): StudentSearchParams => {
   return Object.entries(values).reduce<StudentSearchParams>(
@@ -59,20 +57,15 @@ const normalizeSearchParams = (values: FormValues): StudentSearchParams => {
 const UserCurd = () => {
   const [form] = Form.useForm<Student>();
   const searchCardRef = useRef<HTMLDivElement>(null);
-  const tableCardRef = useRef<HTMLDivElement>(null);
-  const optionsHeaderRef = useRef<HTMLDivElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>("add");
   const [editingRecord, setEditingRecord] = useState<Student>();
   const [saving, setSaving] = useState(false);
   const [tableScrollY, setTableScrollY] = useState(MIN_TABLE_SCROLL_Y);
-  const observedRefs = useMemo(() => [tableCardRef, optionsHeaderRef], []);
   const {
     distance: searchCardBottomDistance,
     version: layoutVersion,
-  } = useElementBottomDistance(searchCardRef, {
-    extraRefs: observedRefs,
-  });
+  } = useElementBottomDistance(searchCardRef);
 
   const searchFields = useMemo<FormFieldConfig[]>(
     () => [
@@ -257,43 +250,9 @@ const UserCurd = () => {
   ];
 
   useEffect(() => {
-    const getOuterHeight = (element?: Element | null) => {
-      if (!element) return 0;
-      const rect = element.getBoundingClientRect();
-      const style = window.getComputedStyle(element);
-      return (
-        rect.height +
-        parseFloat(style.marginTop || "0") +
-        parseFloat(style.marginBottom || "0")
-      );
-    };
-
-    const getVerticalPadding = (element?: Element | null) => {
-      if (!element) return 0;
-      const style = window.getComputedStyle(element);
-      return (
-        parseFloat(style.paddingTop || "0") +
-        parseFloat(style.paddingBottom || "0")
-      );
-    };
-
-    const tableCard = tableCardRef.current;
-    const cardBody = tableCard?.querySelector(".ant-card-body");
-    const tableHeader = tableCard?.querySelector(".ant-table-thead");
-    const pagination = tableCard?.querySelector(".ant-pagination");
-
-    const nextTableScrollY =
-      searchCardBottomDistance -
-      CARD_GAP -
-      PAGE_BOTTOM_PADDING -
-      TABLE_HEIGHT_SAFE_OFFSET -
-      getVerticalPadding(cardBody) -
-      getOuterHeight(optionsHeaderRef.current) -
-      getOuterHeight(tableHeader) -
-      getOuterHeight(pagination);
-
+    const nextTableScrollY = searchCardBottomDistance - TABLE_SCROLL_OFFSET;
     setTableScrollY(Math.max(MIN_TABLE_SCROLL_Y, Math.floor(nextTableScrollY)));
-  }, [layoutVersion, searchCardBottomDistance, tableData.length, total]);
+  }, [layoutVersion, searchCardBottomDistance]);
 
   return (
     <div className={styles.page}>
@@ -310,9 +269,9 @@ const UserCurd = () => {
         </Card>
       </div>
 
-      <div ref={tableCardRef}>
+      <div>
         <Card size="small" className={styles.tableCard}>
-          <div ref={optionsHeaderRef} className={styles.optionsHeader}>
+          <div className={styles.optionsHeader}>
             <Button type="primary" onClick={openAddModal}>
               添加用户
             </Button>

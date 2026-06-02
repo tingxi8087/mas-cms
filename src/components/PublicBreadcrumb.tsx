@@ -69,9 +69,9 @@ const PublicBreadcrumb: React.FC = () => {
                   .join("/")}`
               );
             }}
-            style={{
-              color: index == nBreadcrumbList.length - 1 ? "#000" : undefined,
-            }}
+            className={
+              index == nBreadcrumbList.length - 1 ? styles.current : undefined
+            }
           >
             {item.title}
           </a>

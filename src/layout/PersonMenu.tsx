@@ -21,10 +21,10 @@ const PersonMenu: React.FC = () => {
       <Dropdown menu={{ items }} placement="bottom">
         <Space>
           <Avatar
-            style={{ backgroundColor: "#1677ff" }}
+            className={style.personAvatar}
             icon={<UserOutlined />}
           />
-          admin
+          <span className={style.personName}>admin</span>
         </Space>
       </Dropdown>
     </div>

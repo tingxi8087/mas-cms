@@ -9,7 +9,7 @@ export const layoutConfig = eBox({
   boxMinWidth: 1200,
   collapsed: false,
   bodyPadding: {
-    top: 16,
-    left: 16,
+    top: 4,
+    left: 8,
   },
 });
