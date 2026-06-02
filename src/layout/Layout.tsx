@@ -1,6 +1,6 @@
 import style from "./index.module.less";
-import Nav from "./Nav";
-import Side from "./Side";
+import Nav from "./components/Nav";
+import Side from "./components/Side";
 import { Outlet } from "react-router-dom";
 import { layoutStore } from "@/store/sys";
 import { layoutConfig } from "./layoutConfig";

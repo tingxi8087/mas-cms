@@ -71,7 +71,7 @@ src/
 ├── components/      # 公共组件，如面包屑、SearchTableForm、富文本编辑器
 ├── hooks/           # 表格分页、选中、复制、新增、删除等 hooks
 ├── http/            # 请求封装
-├── layout/          # 后台整体布局：顶栏、侧栏、主区域
+├── layout/          # 后台整体布局入口、配置和布局私有组件
 ├── mock/            # 本地 mock 数据
 ├── router/          # 路由配置与路由守卫
 ├── store/           # e-boxes 状态
@@ -81,7 +81,7 @@ src/
 ├── theme.less       # 主题变量
 └── views/           # 页面视图
     ├── Login/       # 登录页
-    ├── UserCurd/    # 用户 CRUD 示例页
+    ├── UserCurd/    # 用户 CRUD 示例页，页面私有组件放在 components/
     ├── EBoxUse/     # e-boxes 示例
     ├── AccessPage/  # 权限示例页
     ├── NoLayout/    # 无布局页
@@ -93,7 +93,7 @@ src/
 
 ### 整体布局
 
-布局入口在 `src/layout/Layout.tsx`，样式在 `src/layout/index.module.less`。
+布局入口在 `src/layout/Layout.tsx`，样式在 `src/layout/index.module.less`。布局内部子组件放在 `src/layout/components`，例如顶部导航、侧栏菜单和用户菜单。
 
 当前布局使用 CSS Grid：
 
@@ -123,6 +123,7 @@ export const layoutConfig = eBox({
 
 - 不要在业务页面里重新实现整页布局。
 - 页面只负责主区域里的业务内容。
+- 布局入口、配置和私有组件分开维护：`Layout.tsx` 负责组合，`layoutConfig.ts` 负责可配置参数，`components/` 放布局内部组件。
 - 需要无导航页时，使用已有的 `layoutStore.sideNavHide` / `layoutStore.topNavHide` 机制。
 - 主区域里的页面模块优先使用 `Card size="small"` 承载，适合后台的密度和扫描习惯。
 
@@ -153,6 +154,7 @@ export const layoutConfig = eBox({
 建议：
 
 - 页面入口优先使用目录下的 `index.tsx`，路由中写 `@/views/UserCurd`。
+- 页面私有子组件放进当前页面目录的 `components/`，例如 `src/views/UserCurd/components/UserFormModal.tsx`。
 - 子路由较多时，按业务模块建立目录。
 - 不要把复杂页面逻辑写进路由文件，路由只做配置。
 
@@ -176,9 +178,7 @@ return (
       <Table />
     </Card>
 
-    <Modal>
-      <Form />
-    </Modal>
+    <UserFormModal ref={userFormModalRef} />
   </>
 );
 ```
@@ -187,7 +187,7 @@ return (
 
 - 查询表单使用 `SearchTableForm`。
 - 列表数据使用 `useBasePageTable` 管理分页、loading、查询参数和刷新。
-- 新增/编辑弹窗共用一份 Form，使用 `modalMode` 区分。
+- 新增/编辑弹窗放在页面自己的 `components/` 目录，并使用 `ref.open(config) + onEvent`。
 - 查询参数提交前要清理空值，避免把 `undefined`、`null`、空字符串传给接口。
 - 页面内样式使用 `index.module.less`，不要使用远程 CSS 工具类。
 - 操作按钮放在列表 Card 的顶部或单独 Card 中，保持页面层级清晰。
@@ -901,17 +901,15 @@ export default function Page() {
 
 - `searchParams`：查询条件，由 `SearchTableForm` 提交。
 - `tableData`：表格数据，由 `useBasePageTable` 管理。
-- `modalOpen`：新增/编辑弹窗开关。
-- `modalMode`：区分新增和编辑。
-- `editingRecord`：当前编辑行。
-- `saving`：保存按钮 loading。
+- `userFormModalRef`：通过 `ref.current?.open(config)` 打开新增/编辑弹窗。
+- `tableScrollY`：表格内容滚动高度，结合主区域可用空间计算。
 
 推荐流程：
 
 1. 查询：表单提交后清理空值，写入 `setSearchParams`。
 2. 列表：`useBasePageTable` 监听查询参数、分页参数并请求数据。
-3. 新增：打开弹窗，清空表单，保存成功后关闭并 `reloadTable`。
-4. 编辑：打开弹窗，回填当前行，保存成功后关闭并 `reloadTable`。
+3. 新增：调用 `userFormModalRef.current?.open({ mode: "add", onEvent })`，保存成功后 `reloadTable`。
+4. 编辑：调用 `userFormModalRef.current?.open({ mode: "edit", initialValues: record, onEvent })`，保存成功后 `reloadTable`。
 5. 删除：使用 `Modal.confirm` 二次确认，成功后 `reloadTable`。
 
 清理查询参数示例：
@@ -927,6 +925,56 @@ const normalizeSearchParams = (values: FormValues) => {
 };
 ```
 
+### 弹窗推荐写法
+
+业务弹窗优先按 `.agent/skills/react-modal-creator` 的模式实现。弹窗组件不接收 props，由组件内部维护可见状态、表单状态和提交 loading；页面只持有 ref，并通过 `open(config): void` 传入标题、初始值和事件回调。
+
+用户管理页的 `src/views/UserCurd/components/UserFormModal.tsx` 是当前示例：
+
+- 弹窗组件使用 `forwardRef<UserFormModalRef, {}>`，不声明业务 props。
+- `UserFormModalRef` 必须包含带 JSDoc 的 `open(config): void` 方法。
+- `open` 不返回 Promise，弹窗结果统一通过 `config.onEvent` 通知页面。
+- 函数类配置存入 state 时使用 `Fn` 后缀，比如 `onEventFn`。
+- 弹窗内点击确定、取消、关闭时分别发出 `success`、`cancel`、`closed` 事件。
+- 页面负责接口副作用：新增、编辑成功后提示并调用 `reloadTable`。
+
+页面调用示例：
+
+```tsx
+const userFormModalRef = useRef<UserFormModalRef | null>(null);
+
+const openEditModal = (record: Student) => {
+  userFormModalRef.current?.open({
+    mode: "edit",
+    title: "编辑用户",
+    okText: "保存",
+    initialValues: record,
+    onEvent: handleUserFormEvent,
+  });
+};
+
+const handleUserFormEvent = async (event: UserFormModalEvent) => {
+  if (event.type !== "success") return;
+
+  const res =
+    event.mode === "add"
+      ? await addStudentHttp(event.values)
+      : await setStudentHttp({
+          ...event.values,
+          id: event.values.id as number,
+        });
+
+  if (res?.status) {
+    message.success(event.mode === "add" ? "添加用户成功！" : "更新成功！");
+    reloadTable();
+  }
+};
+
+<UserFormModal ref={userFormModalRef} />;
+```
+
+这种写法适合新增/编辑共用表单、选择器弹窗、复杂配置弹窗和带中间操作的弹窗。页面不需要维护 `modalOpen`、`modalMode`、`editingRecord`、`saving` 这一组临时状态，弹窗也不会被页面 props 绑死，复用和迁移会更轻。
+
 ## 开发建议
 
 - 新页面优先从 `UserCurd` 复制结构，再替换字段、接口和列配置。
@@ -934,6 +982,7 @@ const normalizeSearchParams = (values: FormValues) => {
 - 搜索字段不要和接口参数强耦合，必要时在提交前做一次格式转换。
 - mock 数据要返回过滤后的 `total`，否则分页显示会不准确。
 - 路由、页面、组件、hooks 分层保持清晰。
+- 新弹窗优先使用 `ref.open(config) + onEvent`，页面只处理接口、刷新和反馈。
 - 页面内操作反馈使用 `message`，危险操作使用 `Modal.confirm`。
 - 长列表或复杂表单优先保持密度克制，后台不是营销页。
 - 构建前至少跑一次 `npx tsc --noEmit` 和 `npm run build`。

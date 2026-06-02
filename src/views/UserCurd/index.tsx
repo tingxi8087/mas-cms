@@ -1,9 +1,6 @@
 import {
   Button,
   Card,
-  Form,
-  Input,
-  InputNumber,
   Modal,
   Space,
   Table,
@@ -24,6 +21,10 @@ import {
   getStudentHttp,
   setStudentHttp,
 } from "@/mock/mock";
+import UserFormModal, {
+  UserFormModalEvent,
+  UserFormModalRef,
+} from "./components/UserFormModal";
 
 type Student = {
   id: number;
@@ -36,8 +37,6 @@ type Student = {
 type StudentSearchParams = Partial<
   Pick<Student, "id" | "name" | "age" | "des" | "like">
 >;
-
-type ModalMode = "add" | "edit";
 
 const MIN_TABLE_SCROLL_Y = 80;
 const TABLE_SCROLL_OFFSET = 169;
@@ -55,12 +54,8 @@ const normalizeSearchParams = (values: FormValues): StudentSearchParams => {
 };
 
 const UserCurd = () => {
-  const [form] = Form.useForm<Student>();
   const searchCardRef = useRef<HTMLDivElement>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<ModalMode>("add");
-  const [editingRecord, setEditingRecord] = useState<Student>();
-  const [saving, setSaving] = useState(false);
+  const userFormModalRef = useRef<UserFormModalRef | null>(null);
   const [tableScrollY, setTableScrollY] = useState(MIN_TABLE_SCROLL_Y);
   const {
     distance: searchCardBottomDistance,
@@ -134,45 +129,40 @@ const UserCurd = () => {
   });
 
   const openAddModal = () => {
-    setModalMode("add");
-    setEditingRecord(undefined);
-    form.resetFields();
-    setModalOpen(true);
+    userFormModalRef.current?.open({
+      mode: "add",
+      title: "添加用户",
+      okText: "添加",
+      onEvent: handleUserFormEvent,
+    });
   };
 
   const openEditModal = (record: Student) => {
-    setModalMode("edit");
-    setEditingRecord(record);
-    form.setFieldsValue(record);
-    setModalOpen(true);
+    userFormModalRef.current?.open({
+      mode: "edit",
+      title: "编辑用户",
+      okText: "保存",
+      initialValues: record,
+      onEvent: handleUserFormEvent,
+    });
   };
 
-  const closeModal = () => {
-    setModalOpen(false);
-    setEditingRecord(undefined);
-    form.resetFields();
-  };
+  const handleUserFormEvent = async (event: UserFormModalEvent) => {
+    if (event.type !== "success") {
+      return;
+    }
 
-  const handleSave = async () => {
-    const values = await form.validateFields();
-    setSaving(true);
-    try {
-      const res =
-        modalMode === "add"
-          ? await addStudentHttp(values)
-          : await setStudentHttp({
-              ...editingRecord,
-              ...values,
-              id: editingRecord?.id || values.id,
-            });
+    const res =
+      event.mode === "add"
+        ? await addStudentHttp(event.values)
+        : await setStudentHttp({
+            ...event.values,
+            id: event.values.id as number,
+          });
 
-      if (res?.status) {
-        message.success(modalMode === "add" ? "添加学生成功！" : "更新成功！");
-        closeModal();
-        reloadTable();
-      }
-    } finally {
-      setSaving(false);
+    if (res?.status) {
+      message.success(event.mode === "add" ? "添加用户成功！" : "更新成功！");
+      reloadTable();
     }
   };
 
@@ -269,13 +259,12 @@ const UserCurd = () => {
         </Card>
       </div>
 
-      <div>
-        <Card size="small" className={styles.tableCard}>
-          <div className={styles.optionsHeader}>
-            <Button type="primary" onClick={openAddModal}>
-              添加用户
-            </Button>
-          </div>
+      <Card size="small" className={styles.tableCard}>
+        <div className={styles.optionsHeader}>
+          <Button type="primary" onClick={openAddModal}>
+            添加用户
+          </Button>
+        </div>
         <Table
           rowKey="id"
           columns={columns}
@@ -294,53 +283,8 @@ const UserCurd = () => {
           onChange={handleTableChange}
         />
       </Card>
-      </div>
 
-      <Modal
-        title={modalMode === "add" ? "添加用户" : "编辑用户"}
-        open={modalOpen}
-        onCancel={closeModal}
-        onOk={handleSave}
-        confirmLoading={saving}
-        destroyOnClose
-      >
-        <Form
-          form={form}
-          className={styles.modalForm}
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 600 }}
-        >
-          <Form.Item
-            name="name"
-            label="姓名"
-            rules={[{ required: true, message: "请输入姓名" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="age"
-            label="年龄"
-            rules={[{ required: true, message: "请输入年龄" }]}
-          >
-            <InputNumber controls={false} style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item
-            name="des"
-            label="描述"
-            rules={[{ required: true, message: "请输入描述" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="like"
-            label="爱好"
-            rules={[{ required: true, message: "请输入爱好" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <UserFormModal ref={userFormModalRef} />
     </div>
   );
 };

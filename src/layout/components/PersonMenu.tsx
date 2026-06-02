@@ -3,7 +3,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { Avatar, MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
 import { useNavigate } from "react-router-dom";
-import style from "./index.module.less";
+import style from "../index.module.less";
 
 const PersonMenu: React.FC = () => {
   const navigate = useNavigate();

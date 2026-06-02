@@ -1,4 +1,4 @@
-import style from "./index.module.less";
+import style from "../index.module.less";
 import React, { useEffect, useState } from "react";
 import type { MenuProps } from "antd";
 import { Button, Menu, Tooltip } from "antd";
@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getMenuRouter } from "@/.utils/routerRender";
 import { RouterIndex } from "@/router";
 import { ItemType, MenuItemType } from "antd/es/menu/interface";
-import { layoutConfig } from "./layoutConfig";
+import { layoutConfig } from "../layoutConfig";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 // 要自定义菜单改这个就好
 const navList: ItemType<MenuItemType>[] | undefined = undefined;
