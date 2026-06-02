@@ -1,5 +1,5 @@
 import { layoutConfig } from "@/layout/layoutConfig";
-import { Form, Input, Button, Card } from "antd";
+import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import styles from "./index.module.less";
@@ -18,10 +18,27 @@ export default function Login() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.panel}>
-        <h1 className={styles.title}> {NAV_NAME}</h1>
-        <Card className={styles.card}>
-          <Form name="login" onFinish={onFinish} autoComplete="off">
+      <div className={styles.shell}>
+        <section className={styles.brandPanel}>
+          <div className={styles.brandMark}>{NAV_NAME.slice(0, 1).toUpperCase()}</div>
+          <div>
+            <div className={styles.brandName}>{NAV_NAME}</div>
+            <div className={styles.brandLine}>Content Management Console</div>
+          </div>
+        </section>
+
+        <section className={styles.formPanel}>
+          <div className={styles.formHeader}>
+            <h1 className={styles.title}>登录工作台</h1>
+            <p className={styles.subTitle}>使用你的账号进入管理后台</p>
+          </div>
+
+          <Form
+            name="login"
+            onFinish={onFinish}
+            autoComplete="off"
+            className={styles.form}
+          >
             <Form.Item
               name="username"
               rules={[{ required: true, message: "请输入用户名!" }]}
@@ -58,7 +75,7 @@ export default function Login() {
               </Button>
             </Form.Item>
           </Form>
-        </Card>
+        </section>
       </div>
     </div>
   );
