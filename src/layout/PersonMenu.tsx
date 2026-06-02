@@ -3,6 +3,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { Avatar, MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
 import { useNavigate } from "react-router-dom";
+import style from "./index.module.less";
 
 const PersonMenu: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const PersonMenu: React.FC = () => {
     },
   ];
   return (
-    <div className="mr-1 pointer h-1mx flex flex-y-c">
+    <div className={style.personMenu}>
       <Dropdown menu={{ items }} placement="bottom">
         <Space>
           <Avatar

@@ -286,7 +286,7 @@ const UserCurd = () => {
       >
         <Form
           form={form}
-          className="mt-2"
+          className={styles.modalForm}
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}

@@ -2,6 +2,7 @@ import { layoutConfig } from "@/layout/layoutConfig";
 import { Form, Input, Button, Card } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import styles from "./index.module.less";
 
 export default function Login() {
   const { NAV_NAME } = layoutConfig;
@@ -16,10 +17,10 @@ export default function Login() {
   };
 
   return (
-    <div>
-      <div className="flex flex-col flex-y-c mt-1x">
-        <h1 className="mb-2"> {NAV_NAME}</h1>
-        <Card className="w-3x">
+    <div className={styles.page}>
+      <div className={styles.panel}>
+        <h1 className={styles.title}> {NAV_NAME}</h1>
+        <Card className={styles.card}>
           <Form name="login" onFinish={onFinish} autoComplete="off">
             <Form.Item
               name="username"

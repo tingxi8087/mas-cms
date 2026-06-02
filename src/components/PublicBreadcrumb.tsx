@@ -3,6 +3,7 @@ import { Breadcrumb } from "antd";
 import { getMenuRouter } from "@/.utils/routerRender";
 import { RouterIndex } from "@/router";
 import { useLocation, useNavigate } from "react-router-dom";
+import styles from "./PublicBreadcrumb.module.less";
 function findLabels(data: any, path: any) {
   const labels: any[] = [];
   function traverse(nodes: any, path: string | any[]) {
@@ -82,8 +83,8 @@ const PublicBreadcrumb: React.FC = () => {
     return <></>;
   }
   return (
-    <div className="bg-fff">
-      <Breadcrumb className={`pt-2m px-1 pb-1m`} items={breadcrumbList} />
+    <div className={styles.wrapper}>
+      <Breadcrumb className={styles.breadcrumb} items={breadcrumbList} />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { Button, Card } from "antd";
 import eBox from "e-boxes";
+import styles from "./index.module.less";
 
 const state = eBox({
   count: 0,
@@ -9,7 +10,7 @@ export default function eBoxUse() {
   return (
     <Card>
       <div>用eBoxes进行局部状态管理</div>
-      <div className="font-700">num:{state.count}</div>
+      <div className={styles.count}>num:{state.count}</div>
       <Button
         onClick={() => {
           state.count++;

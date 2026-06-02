@@ -17,9 +17,9 @@ const renderHtml = async () => {
   );
   RootDom.render(
     <>
-      <div className="abs left-50-pct top-50-pct translate--50-pct flex flex-x-c flex-y-c flex-col">
+      <div className="app-loading">
         <Spin size="large" />
-        <div className="mt-1 font-28px">{navName}</div>
+        <div className="app-loading-title">{navName}</div>
       </div>
     </>
   );

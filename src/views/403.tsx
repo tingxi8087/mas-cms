@@ -1,8 +1,9 @@
 import { Result } from "antd";
+import styles from "./statusPage.module.less";
 
 const Page403 = () => {
   return (
-    <div className="flex flex-x-c flex-y-c w-100-pct">
+    <div className={styles.page}>
       <Result
         status="403"
         title="403"
