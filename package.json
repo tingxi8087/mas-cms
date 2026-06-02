@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "dev": "vite --mode dev",
     "start": "vite --mode dev",
     "start:pro": "vite --mode pro",
     "build": "vite build --mode pro",
@@ -13,8 +14,6 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.1.4",
-    "@ant-design/pro-components": "^2.6.2",
-    "@ant-design/pro-layout": "^7.15.2",
     "antd": "^5.6.0",
     "axios": "^1.4.0",
     "e-boxes": "^0.0.2",
