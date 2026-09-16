@@ -4,6 +4,8 @@ import { useDomChange } from "./useDomChange";
 
 type ElementRect = Pick<DOMRect, "bottom" | "height" | "left" | "right" | "top" | "width" | "x" | "y">;
 
+const EMPTY_REFS: RefObject<Element | null>[] = [];
+
 export interface UseElementBottomDistanceOptions {
   enabled?: boolean;
   extraRefs?: RefObject<Element | null>[];
@@ -14,7 +16,7 @@ export const useElementBottomDistance = (
   targetRef: RefObject<Element | null>,
   options: UseElementBottomDistanceOptions = {},
 ) => {
-  const { enabled = true, extraRefs = [], minDistance = 0 } = options;
+  const { enabled = true, extraRefs = EMPTY_REFS, minDistance = 0 } = options;
   const [distance, setDistance] = useState(minDistance);
   const [rect, setRect] = useState<ElementRect>();
   const targetRefs = useMemo(() => [targetRef, ...extraRefs], [extraRefs, targetRef]);
@@ -34,7 +36,7 @@ export const useElementBottomDistance = (
     const nextDistance = Math.max(minDistance, window.innerHeight - nextRect.bottom);
 
     setDistance(nextDistance);
-    setRect({
+    const rectangle: ElementRect = {
       bottom: nextRect.bottom,
       height: nextRect.height,
       left: nextRect.left,
@@ -43,7 +45,8 @@ export const useElementBottomDistance = (
       width: nextRect.width,
       x: nextRect.x,
       y: nextRect.y,
-    });
+    };
+    setRect(previous => previous && Object.keys(rectangle).every(key => previous[key as keyof ElementRect] === rectangle[key as keyof ElementRect]) ? previous : rectangle);
   }, [enabled, minDistance, targetRef]);
 
   const refresh = useCallback(() => {

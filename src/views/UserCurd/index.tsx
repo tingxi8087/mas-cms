@@ -14,7 +14,7 @@ import SearchTableForm, {
   FormValues,
 } from "@/components/SearchTableForm";
 import { useElementBottomDistance } from "@/hooks/useElementBottomDistance";
-import { useBasePageTable } from "@/hooks/openDobuleTableHooks";
+import { useBasePageTable } from "@/hooks/useTableHooks";
 import {
   addStudentHttp,
   delStudentHttp,

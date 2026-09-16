@@ -1,204 +1,93 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { DependencyList, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useResource, ResourceOptions } from "./useResource";
+import { useRefState } from "./useRefState";
 
-/**
- * 带存储功能的useState hook
- * @param key 唯一标识符，用于localStorage存储
- * @param defaultValue 默认值
- * @returns [state, setState] 与useState相同的返回值
- */
-function useStoredState<T>(key: string, defaultValue: T): [T, (value: T | ((prevState: T) => T)) => void] {
-  // 从localStorage获取初始值
-  const getStoredValue = (): T => {
-    try {
-      const storedValue = localStorage.getItem(key);
-      if (storedValue !== null) {
-        const parsed = JSON.parse(storedValue);
-        // 检查是否是新的存储格式 {value: ...}
-        if (parsed && typeof parsed === 'object' && 'value' in parsed) {
-          return parsed.value === null || parsed.value === undefined ? defaultValue : parsed?.value;
-        }
-        // 兼容旧的存储格式（直接存储值）
-        return defaultValue;
-      }
-    } catch (error) {
-      console.warn(`Failed to parse stored value for key "${key}":`, error);
-    }
-    return defaultValue;
-  };
-
-  // 初始化状态
-  const [state, setState] = useState<T>(getStoredValue);
-
-  // 存储值到localStorage
-  const setStoredValue = (value: T) => {
-    try {
-      // 存储为 {value: ...} 格式，避免基本类型与对象类型混淆
-      localStorage.setItem(key, JSON.stringify({ value }));
-    } catch (error) {
-      console.warn(`Failed to store value for key "${key}":`, error);
-    }
-  };
-
-  // 包装setState，每次状态变更时都存储到localStorage
-  const setStoredState = (value: T | ((prevState: T) => T)) => {
-    setState((prevState) => {
-      const newState = typeof value === 'function' ? (value as (prevState: T) => T)(prevState) : value;
-      setStoredValue(newState);
-      return newState;
-    });
-  };
-  useEffect(() => {
-    getStoredValue();
-    setStoredState(getStoredValue());
-  }, [key]);
-
-  return [state, setStoredState];
-}
-/**
- * 生成请求标识
- */
-const getUUId = () => {
-  let d = new Date().getTime();
-  const uuid = 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = ((d + Math.random() * 16) % 16) | 0;
-    d = Math.floor(d / 16);
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
-  return uuid;
+export type GetTableDataResult<TData, TMeta = unknown> = {
+  data: TData[]; total: number; pageNum?: number; pageSize?: number;
+  render?: boolean; meta?: TMeta;
 };
-
-/**
- * 表格数据请求返回结构
- */
-type GetTableDataResult<TData> = {
-  data: TData[];
-  total: number;
-  pageNum?: number;
-  pageSize?: number;
-  render?: boolean;
-};
-/**
- * 获取表格数据的异步函数
- */
 export type GetTableDataFn<TData> = () => Promise<GetTableDataResult<TData>>;
-/**
- * 根据 id 列表更新数据的异步函数
- */
 export type UpdateGetTableDataByIdFn = (idArr: string[]) => Promise<any[]>;
-/**
- * useBasePageTable 的配置
- */
-type UseBasePageTableOptions<TData, TSearchParams> = {
+export type TableQuery<T> = { pageNum: number; pageSize: number; searchParams: T };
+type TableOptions<TData, TSearchParams, TMeta> = {
   defaultPageSize?: number;
   cachePageSizeKey?: string;
-  getTableData: ({
-    pageNum,
-    pageSize,
-    searchParams
-  }: {
-    pageNum: number;
-    pageSize: number;
-    searchParams: TSearchParams;
-  }) => Promise<GetTableDataResult<TData>>;
+  getTableData: (query: TableQuery<TSearchParams>) => Promise<GetTableDataResult<TData, TMeta>>;
   debounceTime?: number;
-};
+  deps?: DependencyList;
+  subscribe?: ResourceOptions["subscribe"];
+} & ({ query: TableQuery<TSearchParams>; onQueryChange: (query: TableQuery<TSearchParams>) => void }
+  | { query?: undefined; onQueryChange?: undefined });
 
-/**
- * useBasePageTable 的返回结构
- */
-export type UseBasePageTableReturn<TData, TSearchParams> = {
-  pageSize: number;
-  setPageSize: React.Dispatch<React.SetStateAction<number>>;
-  pageNum: number;
-  setPageNum: React.Dispatch<React.SetStateAction<number>>;
-  total: number;
-  setTotal: React.Dispatch<React.SetStateAction<number>>;
-  searchParams: TSearchParams;
-  setSearchParams: React.Dispatch<React.SetStateAction<TSearchParams>>;
-  tableData: TData[];
-  setTableData: React.Dispatch<React.SetStateAction<TData[]>>;
-  loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  reloadTable: () => void;
-};
+function storedPageSize(key: string | undefined, fallback: number) {
+  if (!key) return fallback;
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "null")?.value;
+    return Number.isInteger(value) && value > 0 ? value : fallback;
+  } catch { return fallback; }
+}
 
-/**
- * 基础分页表格 hook
- */
-export const useBasePageTable = <TData = any, TSearchParams = any>(
-  options: UseBasePageTableOptions<TData, TSearchParams>
-): UseBasePageTableReturn<TData, TSearchParams> => {
-  const [defaultPageSize, setDefaultPageSize] = useStoredState(
-    options?.cachePageSizeKey || '_useBasePageTable_defaultPageSize',
-    options?.defaultPageSize || 20
-  );
-  const { getTableData, debounceTime = 200 } = options;
-  const [pageSize, setPageSize] = useState(
-    options?.cachePageSizeKey ? defaultPageSize : options?.defaultPageSize || 20
-  );
-  const [pageNum, setPageNum] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState(0);
-  const [searchParams, setSearchParams] = useState<TSearchParams>({} as TSearchParams);
-  const [tableData, setTableData] = useState<TData[]>([]);
-  const [reloadState, setReloadState] = useState(false);
-  const debounceTimer = useRef<any>(null);
-  const uuIdRef = useRef(getUUId());
+export function useBasePageTable<TData = any, TSearchParams = any, TMeta = unknown>(
+  options: TableOptions<TData, TSearchParams, TMeta>,
+) {
+  const { defaultPageSize = 20, cachePageSizeKey, debounceTime = 200 } = options;
+  const [internalQuery, setInternalQuery, queryRef] = useRefState<TableQuery<TSearchParams>>(() => ({
+    pageNum: 1, pageSize: storedPageSize(cachePageSizeKey, defaultPageSize), searchParams: {} as TSearchParams,
+  }));
+  const query = options.query ?? internalQuery;
+  const latest = useRef(options);
+  latest.current = options;
+  const change = useCallback((update: (query: TableQuery<TSearchParams>) => TableQuery<TSearchParams>) => {
+    const current = latest.current;
+    if (current.query) current.onQueryChange(update(current.query));
+    else setInternalQuery(update(queryRef.current));
+  }, [setInternalQuery, queryRef]);
+  const resource = useResource(() => options.getTableData(query),
+    [query.pageNum, query.pageSize, query.searchParams, ...(options.deps || [])],
+    { delay: debounceTime, subscribe: options.subscribe });
+  const [result, setResult] = useState<GetTableDataResult<TData, TMeta>>();
   useEffect(() => {
-    if (options?.cachePageSizeKey) {
-      setDefaultPageSize(pageSize);
+    if (resource.error) { setResult(undefined); return; }
+    const next = resource.data;
+    if (!next || next.render === false) return;
+    setResult(next);
+    const pageNum = next.pageNum ?? query.pageNum;
+    const pageSize = next.pageSize ?? query.pageSize;
+    if (pageNum !== query.pageNum || pageSize !== query.pageSize) {
+      change(current => ({ ...current, pageNum, pageSize }));
     }
-  }, [pageSize]);
-  const getTableDataWrp = (reqId: string) => {
-    setLoading(true);
-    getTableData({ pageNum, pageSize, searchParams })
-      .then(({ data, total, pageNum, pageSize, render = true }) => {
-        if (!render) return;
-        if (uuIdRef.current !== reqId) return;
-        setTableData(data);
-        setTotal(total);
-        if (pageNum) {
-          setPageNum(pageNum);
-        }
-        if (pageSize) {
-          setPageSize(pageSize);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+  }, [resource.data, resource.error]);
   useEffect(() => {
-    clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-      const reqId = getUUId();
-      uuIdRef.current = reqId;
-      getTableDataWrp(reqId);
-    }, debounceTime);
-  }, [pageNum, reloadState]);
-  useEffect(() => {
-    setPageNum(1);
-    setReloadState((prev) => !prev);
-  }, [searchParams, pageSize]);
-  const reloadTable = () => {
-    setReloadState((prev) => !prev);
-  };
-  return {
-    pageSize,
-    setPageSize,
-    pageNum,
-    setPageNum,
-    total,
-    setTotal,
-    searchParams,
-    setSearchParams,
-    tableData,
-    setTableData,
-    loading,
-    setLoading,
-    reloadTable
-  };
-};
+    if (!cachePageSizeKey) return;
+    try { localStorage.setItem(cachePageSizeKey, JSON.stringify({ value: query.pageSize })); }
+    catch { /* 页容量缓存失败不阻断查询。 */ }
+  }, [cachePageSizeKey, query.pageSize]);
+  const setPageNum = useCallback<React.Dispatch<React.SetStateAction<number>>>(value => {
+    change(q => ({ ...q, pageNum: typeof value === "function" ? value(q.pageNum) : value }));
+  }, [change]);
+  const setPageSize = useCallback<React.Dispatch<React.SetStateAction<number>>>(value => {
+    change(q => {
+      const pageSize = typeof value === "function" ? value(q.pageSize) : value;
+      return pageSize === q.pageSize ? q : { ...q, pageNum: 1, pageSize };
+    });
+  }, [change]);
+  const setSearchParams = useCallback<React.Dispatch<React.SetStateAction<TSearchParams>>>(value => {
+    change(q => ({ ...q, pageNum: 1, searchParams: typeof value === "function" ? (value as (p: TSearchParams) => TSearchParams)(q.searchParams) : value }));
+  }, [change]);
+  const setTableData = useCallback<React.Dispatch<React.SetStateAction<TData[]>>>(value => {
+    setResult(previous => ({ ...previous, total: previous?.total || 0,
+      data: typeof value === "function" ? value(previous?.data || []) : value }));
+  }, []);
+  const setTotal = useCallback<React.Dispatch<React.SetStateAction<number>>>(value => {
+    setResult(previous => ({ ...previous, data: previous?.data || [],
+      total: typeof value === "function" ? value(previous?.total || 0) : value }));
+  }, []);
+  return { ...query, setPageNum, setPageSize, setSearchParams,
+    tableData: result?.data || [], setTableData, total: result?.total || 0, setTotal,
+    data: result, error: resource.error, loading: resource.loading,
+    setLoading: resource.setLoading, reloadTable: resource.reload };
+}
+export type UseBasePageTableReturn<TData, TSearchParams> = ReturnType<typeof useBasePageTable<TData, TSearchParams>>;
 
 /**
  * 根据 id 列表刷新表格局部数据
@@ -214,15 +103,10 @@ export const useReloadDataById = ({
 }) => {
   const reloadDataById = (idArr: string[]) => {
     getTableDataById(idArr).then((data) => {
-      setTableData((newData) => {
-        data?.forEach((item: any) => {
-          const index = idArr?.findIndex((id) => id === item?.[idName]);
-          if (index !== -1) {
-            newData[index] = { ...newData[index], ...item };
-          }
-        });
-        return [...newData];
-      });
+      setTableData(rows => rows.map(row => {
+        const updated = data.find(item => item[idName] === row[idName]);
+        return updated ? { ...row, ...updated } : row;
+      }));
     });
   };
   return reloadDataById;
@@ -395,7 +279,7 @@ export const useAddRowAtStart = <TData extends Record<string, any> = any>(
     const newRows: TData[] = [];
     for (let i = 0; i < len; i++) {
       newRows.push({
-        [idName]: `new-${Date.now()}-${i}-${getUUId()}`,
+        [idName]: `new-${Date.now()}-${i}-${crypto.randomUUID()}`,
         ...(totalRowInitialData || {}),
         ...(initialData || {})
       } as unknown as TData);
@@ -425,7 +309,7 @@ export const useAddRowAtEnd = <TData extends Record<string, any> = any>(
     const newRows: TData[] = [];
     for (let i = 0; i < len; i++) {
       newRows.push({
-        [idName]: `new-${Date.now()}-${i}-${getUUId()}`,
+        [idName]: `new-${Date.now()}-${i}-${crypto.randomUUID()}`,
         ...(totalRowInitialData || {}),
         ...(initialData || {})
       } as unknown as TData);

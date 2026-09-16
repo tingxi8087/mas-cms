@@ -8,6 +8,8 @@ export interface UseDomChangeOptions {
   onChange?: () => void;
 }
 
+const EMPTY_REFS: DomChangeRef[] = [];
+
 const getRefElement = (ref: DomChangeRef) => ref.current;
 
 /**
@@ -15,9 +17,12 @@ const getRefElement = (ref: DomChangeRef) => ref.current;
  * 适合给上层测量类 hook 使用，不绑定具体业务。
  */
 export const useDomChange = (
-  targetRefs: DomChangeRef[] = [],
+  targetRefs: DomChangeRef[] = EMPTY_REFS,
   options: UseDomChangeOptions = {},
 ) => {
+  const refs = useRef(targetRefs);
+  if (refs.current.length !== targetRefs.length || refs.current.some((ref, index) => ref !== targetRefs[index])) refs.current = targetRefs;
+  const stableRefs = refs.current;
   const { enabled = true, observeMutation = true, onChange } = options;
   const [version, setVersion] = useState(0);
   const frameRef = useRef<number>();
@@ -33,6 +38,7 @@ export const useDomChange = (
       cancelAnimationFrame(frameRef.current);
     }
     frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = undefined;
       setVersion((prev) => prev + 1);
       onChangeRef.current?.();
     });
@@ -44,7 +50,7 @@ export const useDomChange = (
     const observedElements = [
       document.documentElement,
       document.body,
-      ...targetRefs.map(getRefElement).filter(Boolean),
+      ...stableRefs.map(getRefElement).filter(Boolean),
     ] as Element[];
 
     window.addEventListener("resize", refresh);
@@ -76,7 +82,7 @@ export const useDomChange = (
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [enabled, observeMutation, refresh, targetRefs]);
+  }, [enabled, observeMutation, refresh, stableRefs]);
 
   return {
     version,
