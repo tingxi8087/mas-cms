@@ -21,6 +21,42 @@
 | 面包屑 | `src/components/PublicBreadcrumb` | 沿用布局提供的入口 |
 | 本地缓存与工具 | `src/utils/localStore.ts`、`src/utils/index.ts` | 先检查数据格式和已有调用 |
 
+## 基础 UI 选择
+
+已有封装负责项目一致性，Ant Design 负责基础交互。以下是选择入口，不要求为每个组件再写一层公共包装。
+
+| 需求 | 优先选择 | 说明 |
+| --- | --- | --- |
+| 列表查询 | `SearchTableForm` | 复用展开、字段配置和缓存，不另建查询面板框架 |
+| 数据列表 | Ant Design `Table` + 表格 hooks | 使用现有分页、loading、rowSelection 等接口 |
+| 编辑表单 | `Form`、`Form.Item` 与现有输入组件 | 校验、错误展示等先用 Form 能力 |
+| 输入和选择 | `Input`、`InputNumber`、`Select`、`DatePicker`、`Checkbox`、`Switch` | 保留组件自带的键盘操作、禁用和校验行为 |
+| 弹窗与侧栏详情 | `Modal`、`Drawer` | CRUD 打开方式参考 `UserFormModal` |
+| 确认与反馈 | `Popconfirm`、`Modal`、`message`、`notification`、`Alert` | 按信息用途选择，不自建提示系统 |
+| 加载、空结果、结果页 | `Spin`、`Skeleton`、`Empty`、`Result` | 组合现有组件表达页面状态 |
+| 信息分组与详情 | `Card`、`Tabs`、`Descriptions`、`Tag`、`Typography` | 保持现有紧凑风格 |
+| 布局与间距 | `Space`、`Row`／`Col` 或局部 CSS | 按需要使用，不为简单布局额外封装 |
+
+使用前确认当前安装的 Ant Design 版本支持相应 API；不要凭其他版本经验照搬属性。项目图标沿用 `@ant-design/icons`，全局状态沿用 e-boxes，不为了套用通用模板更换依赖。
+
+## 新组件的放置与说明
+
+```text
+src/views/UserManage/
+├── index.tsx
+├── index.module.less
+└── components/
+    └── UserFormModal/
+        ├── index.tsx
+        └── index.module.less
+```
+
+上面是页面私有组件的结构示意，当前项目可参考实际的 `UserCurd`。只有去除页面业务假设后仍能被其他页面复用的部分，才提升到 `src/components`。
+
+新增或调整公共组件时，在邻近 README 或本指南补充：用途、适用范围、关键 props／回调、状态由谁维护、最小调用示例及已知限制。简单组件无需单独建立长文档；复杂配置组件可像 `SearchTableForm` 一样保留独立说明。
+
+这些约定按 react-loose-conventions 的“现有项目优先”原则整理：采用组件归属、目录式组件、请求分层和按需提取原则，保留本项目的 e-boxes、图标库、cnpm 和现有布局。
+
 ## 表格使用方式
 
 `useBasePageTable` 维护页码、页容量、查询条件和请求状态。`getTableData` 接收这些参数，返回 `{ data, total }`，可返回服务校正后的 `pageNum`、`pageSize` 及 `meta`。修改查询条件或页容量会回到第一页；重复设置相同页容量不会重置页码。

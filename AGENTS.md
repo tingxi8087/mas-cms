@@ -15,10 +15,27 @@
 - 列表页面以 `src/views/UserCurd/index.tsx` 为参考。保持现有侧栏、顶栏和紧凑的 Ant Design 风格，不添加占空间的 page-heading。
 - 查询区单独一个 Card；操作栏、表格、分页放在同一个 Card。
 - 查询使用 `SearchTableForm`，展开／收起、字段显隐、排序和缓存使用其现有能力。
-- 分页、查询、loading 和刷新使用 `useBasePageTable`，从 `useTableHooks.ts` 导入。`openDobuleTableHooks.ts` 仅用于兼容旧导入，不维护另一份实现。
+- 分页、查询、loading 和刷新使用 `useBasePageTable`，统一从 `useTableHooks.ts` 导入，不维护另一份实现。
 - 表格选中状态使用 `useTableChecked`，唯一来源是行数据的 `_checked`。选中 ID、记录、数量从行数据派生，不另建 selected ID 状态。
 - 表格高度使用 `useElementBottomDistance`，参照 UserCurd 的剩余高度减固定占位方式。先考虑现有 hook，避免页面重复创建 ResizeObserver 或测量 Ant Design 内部 DOM。
 - CRUD 弹窗参考 UserCurd 的 `UserFormModal`；页面专属表单放在该页面的 `components` 中，不提前抽象成通用业务框架。
+
+## UI 组件选择
+
+- 项目已有满足需求的封装时优先复用；没有封装时，基础 UI 优先直接使用 Ant Design 或组合其组件，再考虑自定义实现。
+- 表格、表单、按钮、弹窗、抽屉、分页、选项卡、提示、空状态、加载态等不重复造轮子。先检查当前安装版本的类型、现有用法和必要的官方文档，确认已有属性或组合方式是否能解决问题。
+- 简单布局可以直接用 CSS；不要为替换一小段布局引入组件库，也不要为统一名字给每个 Ant Design 组件再套一层。
+- 封装应解决实际重复的交互或配置，而非单纯转发全部 props。优先使用组件公开 API、主题配置和项目已有样式，避免依赖内部 DOM 结构或大范围覆盖全局样式。
+- 自定义组件前说明 Ant Design 与项目现有组件的具体缺口，只实现缺失部分。新 UI 库和图标库不能因个人习惯引入。
+
+## 组件归属与目录
+
+- 页面入口使用 `src/views/PageName/index.tsx`；页面专属 UI 放在该页面的 `components`，布局专属 UI 放在 `src/layout/components`，业务无关且确有跨页面用途的组件才放进 `src/components`。
+- 组件采用 `ComponentName/index.tsx`、`index.module.less` 的目录形式。页面和组件目录用 PascalCase，hooks 用 `useXxx.ts`，store 和工具文件沿用 lowerCamelCase。不要为统一命名批量重命名现有文件。
+- 优先提取页面私有组件和逻辑，有真实复用需求后再提升为公共能力；不要为了缩短文件机械拆分，也不要把整个页面流程塞进通用组件。
+- 新增公共展示组件通过 props 接收数据、回调和配置，避免直接依赖页面 store、业务 API、特定实体字段或硬编码业务文案。已有异步字段组件沿用注入加载函数的方式。
+- 样式跟随所属组件，真正全局的主题和基础样式才放全局文件。按实际需要建立目录，不创建空目录来凑结构。
+- 路由和菜单元数据保留在 `src/router`，业务逻辑放页面或业务模块；HTTP 客户端、拦截器沿用 `src/http`，页面不另建 axios 实例。
 
 ## 状态、权限与请求
 

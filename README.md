@@ -574,12 +574,7 @@ export const layoutConfig = eBox({
 
 ## Hooks 用法场景
 
-项目里主要有两份表格相关 hooks：
-
-- `src/hooks/openDobuleTableHooks.ts`
-- `src/hooks/useTableHooks.ts`
-
-当前用户管理示例使用的是 `openDobuleTableHooks.ts`。两份文件能力相近，`useTableHooks.ts` 额外包含 `useAddRowAtEnd`，并对部分派生值做了 `useMemo` 优化。如果新页面没有特别原因，建议统一使用 `openDobuleTableHooks.ts`，后续可以再合并成一份标准 hooks。
+表格相关 hooks 统一维护在 `src/hooks/useTableHooks.ts`，用户管理示例和新页面均从该文件导入。分页、查询、刷新、行选中及行增删等能力优先复用这里的实现，具体入口参见 [复用指南](docs/reuse-guide.md)。
 
 ### useRefState
 

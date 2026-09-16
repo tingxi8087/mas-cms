@@ -2,7 +2,6 @@ import { act, createElement, StrictMode, useRef, useState } from "react";
 import { createRoot, Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useBasePageTable, useTableChecked, useReloadDataById } from "@/hooks/useTableHooks";
-import { useBasePageTable as legacyTable } from "@/hooks/openDobuleTableHooks";
 import { useRefState } from "@/hooks/useRefState";
 import { useResource } from "@/hooks/useResource";
 import { useElementBottomDistance } from "@/hooks/useElementBottomDistance";
@@ -39,8 +38,7 @@ it("卸载清理防抖计时器和外部订阅", async () => {
   hook.unmount(); await act(async () => { await vi.advanceTimersByTimeAsync(300); });
   expect(fetcher).not.toHaveBeenCalled(); expect(unsubscribe).toHaveBeenCalledTimes(subscribe.mock.calls.length);
 });
-it("旧表格路径与新路径共用实现，查询和页容量变更回到第一页", async () => {
-  expect(legacyTable).toBe(useBasePageTable);
+it("查询和页容量变更回到第一页，相同页容量保留翻页结果", async () => {
   const fetcher = vi.fn(async (q: any) => ({ data: [q.pageNum], total: 30 }));
   const hook = renderHook(() => useBasePageTable<number, { keyword?: string }>({ getTableData: fetcher, debounceTime: 0 }));
   await flush(); act(() => hook.current.setPageNum(3)); await flush(); expect(hook.current.tableData).toEqual([3]);
