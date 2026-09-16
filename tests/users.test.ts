@@ -28,3 +28,15 @@ it("批量状态、查询返回隔离与删除后的页码校正", async () => {
   for (const row of result.data.list) await done(api.delStudentHttp(row.id));
   expect((await done(api.getStudentHttp({ pageNum: 6, pageSize: 5 }))).data.pageNum).toBe(5);
 });
+
+it("图表汇总读取全部用户并反映状态修改，趋势范围正确", async () => {
+  for (let index = 0; index < 22; index++) await done(api.addStudentHttp({ ...input, account: `chart_user_${index}` }));
+  await done(api.setStudentStatusHttp([1, 2], "disabled"));
+  const { getChartData } = await import("@/mock/charts");
+  const data = await done(getChartData(30));
+  expect(data.total).toBe(51);
+  expect(data.departments.reduce((sum, row) => sum + row.value, 0)).toBe(51);
+  expect(data.statuses.reduce((sum, row) => sum + row.value, 0)).toBe(51);
+  expect(data.roles.reduce((sum, role) => sum + role.values.reduce((a, b) => a + b, 0), 0)).toBe(73);
+  expect(data.trend).toHaveLength(30);
+});

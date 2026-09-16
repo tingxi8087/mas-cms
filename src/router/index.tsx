@@ -1,10 +1,11 @@
-import { AppstoreOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, HomeOutlined, CodeOutlined, BarChartOutlined, DatabaseOutlined, SafetyOutlined, LayoutOutlined } from "@ant-design/icons";
 import { Navigate, createHashRouter } from "react-router-dom";
 import { wrapRoutesWithAuth } from "@/.utils/access";
 import { getReactRouter, useLayout } from "@/.utils/routerRender";
 import Index from "@/views/index";
 import UserCurd from "@/views/UserCurd";
 import NoLayout from "@/views/NoLayout";
+import ChartExamples from "@/views/ChartExamples";
 import EBoxUse from "@/views/EBoxUse";
 import AccessPage from "@/views/AccessPage";
 import Login from "@/views/Login";
@@ -21,12 +22,14 @@ const Router: MasRouter = [
 
   {
     label: "首页",
+    icon: <HomeOutlined aria-hidden />,
     path: "/index",
     element: <Index />,
     access: "admin",
   },
   {
-    label: "简单curd",
+    label: "组件示例",
+    icon: <AppstoreOutlined aria-hidden />,
     path: "/curd",
     children: [
       {
@@ -35,35 +38,28 @@ const Router: MasRouter = [
         hideMenu: true,
       },
       {
-        label: "用户管理(示例)",
+        label: "用户管理",
         path: "/curd/users",
-        icon: <AppstoreOutlined />,
+        icon: <AppstoreOutlined aria-hidden />,
         element: <UserCurd />,
       },
+      { path: "/charts", label: "图表展示", icon: <BarChartOutlined aria-hidden />, element: <ChartExamples /> },
     ],
   },
 
   {
-    path: "/eBoxUse",
-    label: "eBoxes的使用",
-    element: <EBoxUse />,
-  },
-  {
-    path: "/accessPage",
-    label: "权限页面",
-    access: "admin",
-    element: <AccessPage />,
+    path: "/development", label: "开发示例", icon: <CodeOutlined aria-hidden />,
+    children: [
+      { path: "/development", element: <Navigate to="/eBoxUse" replace />, hideMenu: true },
+      { path: "/eBoxUse", label: "状态管理", icon: <DatabaseOutlined aria-hidden />, element: <EBoxUse /> },
+      { path: "/accessPage", label: "权限控制", icon: <SafetyOutlined aria-hidden />, access: "admin", element: <AccessPage /> },
+      { path: "/noLayout", label: "独立布局", icon: <LayoutOutlined aria-hidden />, element: <NoLayout /> },
+    ],
   },
   {
     path: "/login",
     element: <Login />,
     hideMenu: true,
-  },
-  {
-    label: "没有导航栏的页面",
-    // hideMenu: true,
-    path: "/noLayout",
-    element: <NoLayout />,
   },
   {
     path: "/403",

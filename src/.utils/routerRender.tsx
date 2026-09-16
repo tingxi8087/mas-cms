@@ -17,7 +17,8 @@ export const getReactRouterChildren: (
       newChildren = getReactRouterChildren(children, accessArr);
     }
     return {
-      path,
+      // 无 element 的父项仅作菜单分组，不限制子页面原有绝对地址。
+      path: children && !element ? undefined : path,
       element,
       errorElement,
       children: newChildren,
@@ -65,3 +66,14 @@ export const useLayout: (router: MasRouter) => MasRouter = (router) => {
     },
   ];
 };
+
+/** 根据菜单树找出当前页面的完整祖先链，兼容分组与 URL 不同层级。 */
+export function findMenuPath(items: any[], pathname: string): any[] {
+  for (const item of items) {
+    if (!item) continue;
+    if (item.key === pathname) return [item];
+    const children = item.children && findMenuPath(item.children, pathname);
+    if (children?.length) return [item, ...children];
+  }
+  return [];
+}

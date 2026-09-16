@@ -17,6 +17,8 @@
 | 全局状态 | `src/store/sys.ts` | `src/views/EBoxUse` |
 | CRUD 弹窗 | `src/views/UserCurd/components/UserFormModal` | 通过 ref 的 `open(config)` 打开 |
 | HTTP | `src/http/index.ts`、`src/http/request.ts` | 沿用现有客户端和拦截器 |
+| Markdown 文档 | `src/components/MarkdownViewer` | GFM 渲染与局部样式，首页组合弹窗和文档跳转 |
+| ECharts 图表 | `src/components/EChart` | [图表说明](charts.md)、`src/views/ChartExamples` |
 | 富文本 | `src/components/EditorPro` | 优先检查已有封装 |
 | 面包屑 | `src/components/PublicBreadcrumb` | 沿用布局提供的入口 |
 | 本地缓存与工具 | `src/utils/localStore.ts`、`src/utils/index.ts` | 先检查数据格式和已有调用 |

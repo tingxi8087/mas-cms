@@ -25,13 +25,16 @@
     "axios": "^1.4.0",
     "dayjs": "^1.11.21",
     "e-boxes": "^0.0.2",
+    "echarts": "^6.1.0",
     "lodash": "^4.17.21",
     "mas-encrypt": "^1.0.2",
     "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
     "react-quill": "^2.0.0",
-    "react-router-dom": "^6.11.2"
+    "react-router-dom": "^6.11.2",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

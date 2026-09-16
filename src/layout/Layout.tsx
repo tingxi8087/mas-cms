@@ -37,7 +37,7 @@ export default function Layout() {
   const gridTemplateRows = topNavHide ? "1fr" : `${navHeight}px 1fr`;
   const gridTemplateColumns = sideNavHide
     ? "1fr"
-    : `${collapsed ? 45 : sideNavWidth}px 1fr`;
+    : `${collapsed ? 60 : sideNavWidth}px 1fr`;
   const gridTemplateAreas =
     topNavHide && sideNavHide
       ? `"main"`
