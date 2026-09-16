@@ -20,6 +20,15 @@
 - 表格高度使用 `useElementBottomDistance`，参照 UserCurd 的剩余高度减固定占位方式。先考虑现有 hook，避免页面重复创建 ResizeObserver 或测量 Ant Design 内部 DOM。
 - CRUD 弹窗参考 UserCurd 的 `UserFormModal`；页面专属表单放在该页面的 `components` 中，不提前抽象成通用业务框架。
 
+## 弹窗调用约定
+
+- 新增或重构自定义弹窗时遵循 [react-modal-creator](.agent/skills/react-modal-creator/SKILL.md)，不限于 CRUD，文档、详情等弹窗同样适用。基础 UI 继续使用 Ant Design `Modal`。
+- 使用 `forwardRef` + `useImperativeHandle` 暴露 `ref.current?.open(config)`；不接收业务 props。配置、数据和回调统一由 `open` 传入，显示、关闭和内部交互状态由弹窗维护，页面不再维护一份 `open` state。
+- 显式定义 `XxxModalRef`、`XxxModalConfig` 和可辨识联合类型 `XxxModalEvent`，类型与方法用 JSDoc 说明。`open(config): void`，不要返回等待关闭结果的 Promise。
+- 配置提供 `onEvent?: (event: XxxModalEvent) => void | Promise<void>`；中间交互及关闭通过事件回调通知调用方，只有结束类事件才关闭弹窗。
+- `open` 内用 state 保存输入，每次打开重置本次数据和回调。函数入参的 state 使用 `Fn` 后缀，例如 `onEventFn`，通过 `setOnEventFn(() => config.onEvent ?? (() => {}))` 保存，避免 React 将回调当作更新函数执行。不为此引入 `useCallback` / `useMemo`。
+- 文档弹窗参考 `src/views/index/components/DocumentModal`，表单弹窗参考 `src/views/UserCurd/components/UserFormModal`。页面私有弹窗留在页面的 `components` 中，不另建通用弹窗管理框架。
+
 ## UI 组件选择
 
 - 项目已有满足需求的封装时优先复用；没有封装时，基础 UI 优先直接使用 Ant Design 或组合其组件，再考虑自定义实现。
@@ -33,7 +42,7 @@
 - 页面入口使用 `src/views/PageName/index.tsx`；页面专属 UI 放在该页面的 `components`，布局专属 UI 放在 `src/layout/components`，业务无关且确有跨页面用途的组件才放进 `src/components`。
 - 组件采用 `ComponentName/index.tsx`、`index.module.less` 的目录形式。页面和组件目录用 PascalCase，hooks 用 `useXxx.ts`，store 和工具文件沿用 lowerCamelCase。不要为统一命名批量重命名现有文件。
 - 优先提取页面私有组件和逻辑，有真实复用需求后再提升为公共能力；不要为了缩短文件机械拆分，也不要把整个页面流程塞进通用组件。
-- 新增公共展示组件通过 props 接收数据、回调和配置，避免直接依赖页面 store、业务 API、特定实体字段或硬编码业务文案。已有异步字段组件沿用注入加载函数的方式。
+- 新增公共展示组件通过 props 接收数据、回调和配置（弹窗按上面的 `open(config)` 约定），避免直接依赖页面 store、业务 API、特定实体字段或硬编码业务文案。已有异步字段组件沿用注入加载函数的方式。
 - 样式跟随所属组件，真正全局的主题和基础样式才放全局文件。按实际需要建立目录，不创建空目录来凑结构。
 - 路由和菜单元数据保留在 `src/router`，业务逻辑放页面或业务模块；HTTP 客户端、拦截器沿用 `src/http`，页面不另建 axios 实例。
 

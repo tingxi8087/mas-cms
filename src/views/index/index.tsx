@@ -1,10 +1,10 @@
-import { Button, Card, Col, Descriptions, List, Modal, Row, Space, Tag, Typography } from "antd";
-import { useState } from "react";
+import { Button, Card, Col, Descriptions, List, Row, Space, Tag, Typography } from "antd";
+import { useRef } from "react";
 import conventions from "../../../AGENTS.md?raw";
 import reuseGuide from "../../../docs/reuse-guide.md?raw";
 import usersGuide from "../../../docs/user-management.md?raw";
 import chartsGuide from "../../../docs/charts.md?raw";
-import MarkdownViewer from "@/components/MarkdownViewer";
+import DocumentModal, { type DocumentModalRef } from "./components/DocumentModal";
 import { Link } from "react-router-dom";
 import { ArrowRightOutlined, BarChartOutlined, DatabaseOutlined, SafetyOutlined, TeamOutlined } from "@ant-design/icons";
 import styles from "./index.module.less";
@@ -16,7 +16,7 @@ const entries = [
 ];
 const source = "https://github.com/tingxi8087/mas-cms";
 export default function Index() {
-  const [document, setDocument] = useState<{ title: string; text: string; path: string }>();
+  const documentModalRef = useRef<DocumentModalRef>(null);
   const documents: Record<string, string> = { "AGENTS.md": conventions, "docs/reuse-guide.md": reuseGuide, "docs/user-management.md": usersGuide, "docs/charts.md": chartsGuide };
   return <div className={styles.page}>
     <Card size="small" title="关于 mas-cms" extra={<Typography.Link href={source} target="_blank" rel="noreferrer">项目源码</Typography.Link>}>
@@ -43,15 +43,8 @@ export default function Index() {
         ["复用指南", "docs/reuse-guide.md", "现有组件、hooks 和调用示例"],
         ["用户管理说明", "docs/user-management.md", "表单控件、数据规则与交互范围"],
         ["图表使用说明", "docs/charts.md", "图表封装、Mock 数据与扩展方式"],
-      ]} renderItem={item => <List.Item><List.Item.Meta title={<Button type="link" style={{ padding: 0 }} onClick={() => setDocument({ title: item[0], text: documents[item[1]], path: item[1] })}>{item[0]}</Button>} description={item[2]} /></List.Item>} /></Card></Col>
+      ]} renderItem={item => <List.Item><List.Item.Meta title={<Button type="link" style={{ padding: 0 }} onClick={() => documentModalRef.current?.open({ document: { title: item[0], text: documents[item[1]], path: item[1] }, documents })}>{item[0]}</Button>} description={item[2]} /></List.Item>} /></Card></Col>
     </Row>
-    <Modal title={document?.title} open={!!document} onCancel={() => setDocument(undefined)} footer={null} width={840}>{document && <div key={document.path} className={styles.document}><MarkdownViewer content={document.text} onLinkClick={href => {
-      if (/^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(href)) return false;
-      const path = decodeURIComponent(new URL(href, `https://docs.local/${document.path}`).pathname.slice(1));
-      if (!documents[path]) return false;
-      const title = documents[path].match(/^#\s+(.+)$/m)?.[1] || path;
-      setDocument({ path, title, text: documents[path] });
-      return true;
-    }} /></div>}</Modal>
+    <DocumentModal ref={documentModalRef} />
   </div>;
 }

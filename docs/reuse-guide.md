@@ -15,9 +15,10 @@
 | 通用异步请求状态 | `src/hooks/useResource.ts` | 表格 hook 的组合方式 |
 | 权限 | `src/hooks/useAccess.ts`、`src/components/Access/index.tsx` | `src/views/AccessPage`、`src/router` |
 | 全局状态 | `src/store/sys.ts` | `src/views/EBoxUse` |
+| 文档弹窗 | `src/views/index/components/DocumentModal` | 无业务 props，通过 `ref.open(config)` 传入文档、目录和事件回调 |
 | CRUD 弹窗 | `src/views/UserCurd/components/UserFormModal` | 通过 ref 的 `open(config)` 打开 |
 | HTTP | `src/http/index.ts`、`src/http/request.ts` | 沿用现有客户端和拦截器 |
-| Markdown 文档 | `src/components/MarkdownViewer` | GFM 渲染与局部样式，首页组合弹窗和文档跳转 |
+| Markdown 文档 | `src/components/MarkdownViewer` | GFM 渲染与局部样式；首页 DocumentModal 通过 ref.open({ document, documents, onEvent }) 打开，内部处理文档跳转与关闭 |
 | ECharts 图表 | `src/components/EChart` | [图表说明](charts.md)、`src/views/ChartExamples` |
 | 富文本 | `src/components/EditorPro` | 优先检查已有封装 |
 | 面包屑 | `src/components/PublicBreadcrumb` | 沿用布局提供的入口 |
@@ -33,13 +34,42 @@
 | 数据列表 | Ant Design `Table` + 表格 hooks | 使用现有分页、loading、rowSelection 等接口 |
 | 编辑表单 | `Form`、`Form.Item` 与现有输入组件 | 校验、错误展示等先用 Form 能力 |
 | 输入和选择 | `Input`、`InputNumber`、`Select`、`DatePicker`、`Checkbox`、`Switch` | 保留组件自带的键盘操作、禁用和校验行为 |
-| 弹窗与侧栏详情 | `Modal`、`Drawer` | CRUD 打开方式参考 `UserFormModal` |
+| 弹窗与侧栏详情 | `Modal`、`Drawer` | 自定义弹窗遵循下方 ref.open 约定；Drawer 沿用现有实现 |
 | 确认与反馈 | `Popconfirm`、`Modal`、`message`、`notification`、`Alert` | 按信息用途选择，不自建提示系统 |
 | 加载、空结果、结果页 | `Spin`、`Skeleton`、`Empty`、`Result` | 组合现有组件表达页面状态 |
 | 信息分组与详情 | `Card`、`Tabs`、`Descriptions`、`Tag`、`Typography` | 保持现有紧凑风格 |
 | 布局与间距 | `Space`、`Row`／`Col` 或局部 CSS | 按需要使用，不为简单布局额外封装 |
 
 使用前确认当前安装的 Ant Design 版本支持相应 API；不要凭其他版本经验照搬属性。项目图标沿用 `@ant-design/icons`，全局状态沿用 e-boxes，不为了套用通用模板更换依赖。
+
+## 弹窗使用方式
+
+新增或重构自定义弹窗统一采用 [react-modal-creator](../.agent/skills/react-modal-creator/SKILL.md) 的 `forwardRef` + `useImperativeHandle` 模式。组件不接收业务 props，`open(config): void` 传入配置，内部维护显示状态与交互数据。回调存为 `onEventFn`，通过 `onEvent` 持续通知中间交互和关闭事件，不返回等待关闭结果的 Promise。
+
+首页的实际调用方式如下，文档内容与目录由调用方提供：
+
+```tsx
+const documentModalRef = useRef<DocumentModalRef>(null);
+
+// 点击时打开；每次 open 都替换本次配置与回调。
+documentModalRef.current?.open({
+  document: { title: "开发约定", path: "AGENTS.md", text: conventions },
+  documents,
+  onEvent: (event) => {
+    if (event.type === "link") {
+      // event.href 是点击的链接，弹窗内部负责本地文档切换。
+    }
+    if (event.type === "closed") {
+      // 关闭通知；页面无需维护弹窗的显示状态。
+    }
+  },
+});
+
+// 页面 JSX 中挂载一次。
+<DocumentModal ref={documentModalRef} />
+```
+
+参考 [DocumentModal](../src/views/index/components/DocumentModal/index.tsx) 的配置、事件和 Ref 类型；表单提交场景参考 [UserFormModal](../src/views/UserCurd/components/UserFormModal/index.tsx)。验收时覆盖打开、内部交互、关闭后重新打开，以及回调和数据是否随新配置重置。
 
 ## 新组件的放置与说明
 

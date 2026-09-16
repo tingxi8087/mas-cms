@@ -64,5 +64,9 @@ test("文档 Markdown 渲染和相对文档链接", async ({ page }) => {
   await page.screenshot({ animations: 'disabled', path: test.info().outputPath('markdown.png') });
   await dialog.getByRole('link', { name: '图表说明', exact: true }).click();
   await expect(dialog.getByRole('heading', { name: '图表展示', exact: true })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Close' }).click();
+  await expect(dialog).not.toBeVisible();
+  await page.getByRole('button', { name: '开发约定', exact: true }).click();
+  await expect(dialog.getByRole('heading', { name: '项目开发约定', exact: true })).toBeVisible();
   await expect(page).toHaveURL(/#\/index$/);
 });
