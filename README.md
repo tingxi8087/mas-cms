@@ -1000,7 +1000,7 @@ export default function Page() {
 
 ## CRUD 页面推荐模式
 
-以 `src/views/UserCurd` 为参考。
+以 `src/views/UserCurd` 为参考。完整交互和组件说明见 [用户管理示例](docs/user-management.md)。
 
 推荐状态拆分：
 
@@ -1015,7 +1015,7 @@ export default function Page() {
 2. 列表：`useBasePageTable` 监听查询参数、分页参数并请求数据。
 3. 新增：调用 `userFormModalRef.current?.open({ mode: "add", onEvent })`，保存成功后 `reloadTable`。
 4. 编辑：调用 `userFormModalRef.current?.open({ mode: "edit", initialValues: record, onEvent })`，保存成功后 `reloadTable`。
-5. 删除：使用 `Modal.confirm` 二次确认，成功后 `reloadTable`。
+5. 删除：使用 `Popconfirm` 二次确认，成功后 `reloadTable`。
 
 清理查询参数示例：
 
@@ -1039,7 +1039,7 @@ const normalizeSearchParams = (values: FormValues) => {
 - 弹窗组件使用 `forwardRef<UserFormModalRef, {}>`，不声明业务 props。
 - `UserFormModalRef` 必须包含带 JSDoc 的 `open(config): void` 方法。
 - `open` 不返回 Promise，弹窗结果统一通过 `config.onEvent` 通知页面。
-- 函数类配置存入 state 时使用 `Fn` 后缀，比如 `onEventFn`。
+- 单独存储函数时使用 `Fn` 后缀并通过函数包装传给 setter；也可以像当前示例一样，将回调作为 `config` 对象字段保存。
 - 弹窗内点击确定、取消、关闭时分别发出 `success`、`cancel`、`closed` 事件。
 - 页面负责接口副作用：新增、编辑成功后提示并调用 `reloadTable`。
 

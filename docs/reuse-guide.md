@@ -57,6 +57,8 @@ src/views/UserManage/
 
 这些约定按 react-loose-conventions 的“现有项目优先”原则整理：采用组件归属、目录式组件、请求分层和按需提取原则，保留本项目的 e-boxes、图标库、cnpm 和现有布局。
 
+用户管理完整交互与组件示例见 [用户管理说明](user-management.md)。
+
 ## 表格使用方式
 
 `useBasePageTable` 维护页码、页容量、查询条件和请求状态。`getTableData` 接收这些参数，返回 `{ data, total }`，可返回服务校正后的 `pageNum`、`pageSize` 及 `meta`。修改查询条件或页容量会回到第一页；重复设置相同页容量不会重置页码。

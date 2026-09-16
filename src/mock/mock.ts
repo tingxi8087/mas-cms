@@ -1,6 +1,6 @@
-import { message } from "antd";
+import { Student, StudentSearchParams, UserInput, departments, roleOptions, hobbyOptions } from "./userModel";
 
-const dataSource = [
+const initialRows = [
   {
     id: 1,
     name: "小蔡",
@@ -206,177 +206,66 @@ const dataSource = [
   },
 ];
 
-export const getStudentHttp = (
-  req:
-    | {
-        pageNum?: number;
-        pageSize?: number;
-        id?: number;
-        name?: string;
-        age?: number;
-        des?: string;
-        like?: string;
-      }
-    | any
-) =>
-  new Promise<{
-    data: { list: any[]; total: number; pageNum: number; pageSize: number };
-    status: 0 | 1;
-  }>((resolve) => {
-    // Destructure the request parameters
-    const {
-      pageNum: tempPageNum,
-      pageSize: tempPageSize,
-      id,
-      name,
-      age,
-      des,
-      like,
-    } = req;
-    const pageNum = tempPageNum || 1;
-    const pageSize = tempPageSize || 5;
-    // Filter the dataSource based on the provided parameters
-    let filteredData = dataSource;
 
-    if (id) {
-      filteredData = filteredData.filter((student) => student.id === id);
-    }
+const dataSource: Student[] = initialRows.map((row, index) => ({
+  ...row, age: 20 + index % 35, account: `user${String(row.id).padStart(3, "0")}`,
+  gender: index % 2 ? "female" : "male", phone: `1380000${String(row.id).padStart(4, "0")}`,
+  email: `user${row.id}@example.com`, department: departments[index % departments.length].value,
+  roles: [roleOptions[index % roleOptions.length].value], status: index % 4 === 0 ? "disabled" : "enabled",
+  birthday: `${1990 + index % 10}-06-15`, hobbies: [hobbyOptions[index % hobbyOptions.length]],
+  notifications: index % 3 !== 0, createdAt: `2026-${String(1 + index % 8).padStart(2, "0")}-${String(1 + index % 27).padStart(2, "0")}`,
+}));
+let nextId = Math.max(...dataSource.map(row => row.id)) + 1;
+const wait = () => new Promise<void>(resolve => setTimeout(resolve, 180));
+const matches = (text: string, search?: string) => !search || text.toLowerCase().includes(search.trim().toLowerCase());
 
-    if (name) {
-      filteredData = filteredData.filter((student) =>
-        student.name.toLowerCase().includes(name.toLowerCase())
-      );
-    }
-
-    if (age) {
-      filteredData = filteredData.filter((student) => student.age === age);
-    }
-
-    if (des) {
-      filteredData = filteredData.filter((student) =>
-        student.des.toLowerCase().includes(des.toLowerCase())
-      );
-    }
-
-    if (like) {
-      filteredData = filteredData.filter((student) =>
-        student.like.toLowerCase().includes(like.toLowerCase())
-      );
-    }
-    const total = filteredData.length;
-    // Calculate the start and end index based on pagination parameters
-    const startIndex = (pageNum - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    // Slice the filtered data based on the pagination range
-    const paginatedData = filteredData.slice(startIndex, endIndex);
-    // Simulate a delay to mimic an asynchronous HTTP request
-    setTimeout(() => {
-      resolve({
-        status: 1,
-        data: {
-          list: paginatedData,
-          total,
-          pageNum,
-          pageSize,
-        },
-      });
-    }, 500);
-  });
-export const setStudentHttp = (req: {
-  id: number;
-  name?: string;
-  age?: number;
-  des?: string;
-  like?: string;
-}) =>
-  new Promise<{ status: 0 | 1; data: string | 1 }>((resolve) => {
-    const { id, name, age, des, like } = req;
-
-    // 在 dataSource 中查找要更新的学生
-    const studentIndex = dataSource.findIndex((student) => student.id === id);
-
-    // 如果找到了匹配的学生
-    if (studentIndex !== -1) {
-      const updatedStudent = {
-        ...dataSource[studentIndex],
-        name: name || dataSource[studentIndex].name,
-        age: age || dataSource[studentIndex].age,
-        des: des || dataSource[studentIndex].des,
-        like: like || dataSource[studentIndex].like,
-      };
-
-      // 更新学生信息
-      dataSource[studentIndex] = updatedStudent;
-
-      // 模拟异步请求，延迟 500 毫秒后返回更新后的学生信息
-      setTimeout(() => {
-        resolve({
-          data: 1,
-          status: 1,
-        });
-      }, 500);
-    } else {
-      message.error("更新学生失败！");
-      resolve({
-        data: "更新学生失败！",
-        status: 0,
-      });
-    }
-  });
-export const addStudentHttp = (req: {
-  name: string;
-  age: number;
-  des: string;
-  like?: string;
-}) =>
-  new Promise<{ status: 0 | 1; data: string | 1 }>((resolve) => {
-    const { name, age, des, like } = req;
-
-    // 生成随机的 id
-    const id = Math.floor(Math.random() * 10000) + 1;
-
-    // 创建新的学生对象
-    const newStudent = {
-      id,
-      name,
-      age,
-      des,
-      like: like || "",
-    };
-
-    // 将新学生添加到 dataSource 中
-    dataSource.unshift(newStudent);
-
-    // 模拟异步请求，延迟 500 毫秒后返回新添加的学生信息
-    setTimeout(() => {
-      resolve({
-        data: "添加成功！",
-        status: 1,
-      });
-    }, 500);
-  });
-export const delStudentHttp = (id: number) =>
-  new Promise<{ status: 0 | 1; data: string | 1 }>((resolve) => {
-    // 在 dataSource 中查找要删除的学生
-    const studentIndex = dataSource.findIndex((student) => student.id === id);
-    // 如果找到了匹配的学生
-    if (studentIndex !== -1) {
-      // 从 dataSource 中移除学生
-      dataSource.splice(studentIndex, 1)[0];
-
-      // 模拟异步请求，延迟 500 毫秒后返回被删除的学生信息
-      setTimeout(() => {
-        resolve({
-          data: 1,
-          status: 1,
-        });
-      }, 500);
-    } else {
-      // 如果未找到匹配的学生，则返回错误
-      message.error("删除失败！");
-      resolve({
-        data: "删除失败！",
-        status: 0,
-      });
-    }
-  });
+export async function getStudentHttp(req: StudentSearchParams & { pageNum?: number; pageSize?: number }) {
+  await wait();
+  const filtered = dataSource.filter(row =>
+    (!req.id || row.id === req.id) && matches(row.name, req.name) && matches(row.account, req.account) &&
+    (!req.status || row.status === req.status) && (!req.department || row.department === req.department) &&
+    (!req.roles?.length || req.roles.some(role => row.roles.includes(role))) &&
+    (req.ageRange?.leftValue == null || row.age >= req.ageRange.leftValue) &&
+    (req.ageRange?.rightValue == null || row.age <= req.ageRange.rightValue) &&
+    (!req.registered?.[0] || row.createdAt >= req.registered[0]) &&
+    (!req.registered?.[1] || row.createdAt <= req.registered[1])
+  );
+  const pageSize = [5, 10, 20, 50].includes(req.pageSize || 0) ? Number(req.pageSize) : 5;
+  const pageNum = Math.max(1, Math.min(Math.floor(req.pageNum || 1), Math.ceil(filtered.length / pageSize) || 1));
+  return { status: 1 as const, data: { list: structuredClone(filtered.slice((pageNum - 1) * pageSize, pageNum * pageSize)), total: filtered.length, pageNum, pageSize } };
+}
+function clean(input: UserInput): UserInput {
+  const { name, account, age, gender, phone, email, department, roles, status, birthday, hobbies, notifications, avatar, des } = input;
+  if (!name?.trim() || !/^[a-zA-Z][a-zA-Z0-9_]{2,19}$/.test(account || "")) throw new Error("请填写姓名和有效账号");
+  if (dataSource.some(row => row.account.toLowerCase() === account.toLowerCase() && row.id !== (input as Student).id)) throw new Error("账号已存在，请更换账号");
+  if (!departments.some(item => item.value === department) || !roles?.length || roles.some(role => !roleOptions.some(item => item.value === role))) throw new Error("请选择有效部门和角色");
+  if (!Number.isInteger(age) || age < 1 || age > 120 || !/^1[3-9]\d{9}$/.test(phone) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("年龄或联系方式格式不正确");
+  return { name: name.trim(), account, age, gender, phone, email, department, roles: [...roles], status,
+    birthday, hobbies: [...(hobbies || [])], notifications, avatar, des: des || "" };
+}
+export async function setStudentHttp(req: UserInput & { id: number }) {
+  await wait();
+  const index = dataSource.findIndex(row => row.id === req.id);
+  if (index === -1) throw new Error("用户不存在");
+  dataSource[index] = { ...dataSource[index], ...clean(req) };
+  return { status: 1 as const, data: 1 as const };
+}
+export async function addStudentHttp(req: UserInput) {
+  await wait();
+  const values = clean(req);
+  dataSource.unshift({ ...values, id: nextId++, createdAt: new Date().toISOString().slice(0, 10), like: values.hobbies.join("、") });
+  return { status: 1 as const, data: 1 as const };
+}
+export async function delStudentHttp(id: number) {
+  await wait();
+  const index = dataSource.findIndex(row => row.id === id);
+  if (index === -1) throw new Error("用户不存在");
+  dataSource.splice(index, 1);
+  return { status: 1 as const, data: 1 as const };
+}
+export async function setStudentStatusHttp(ids: number[], status: Student["status"]) {
+  await wait();
+  if (!ids.length || ids.some(id => !dataSource.some(row => row.id === id))) throw new Error("请选择有效用户");
+  dataSource.forEach(row => { if (ids.includes(row.id)) row.status = status; });
+  return { status: 1 as const, data: ids.length };
+}

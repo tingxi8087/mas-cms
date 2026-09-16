@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Button, Checkbox, Modal, Select } from 'antd';
 import { CloseOutlined, MenuOutlined } from '@ant-design/icons';
@@ -147,6 +147,7 @@ const QueryFieldSettingModal: React.FC<QueryFieldSettingModalProps> = ({
   onCancel,
   onChange
 }) => {
+  const wasOpen = useRef(false);
   const [selected, setSelected] = useState<QueryFieldItem[]>([]);
 
   const optionsMap = new Map(options?.map((it) => [it?.field, it]));
@@ -160,8 +161,8 @@ const QueryFieldSettingModal: React.FC<QueryFieldSettingModalProps> = ({
   );
 
   useEffect(() => {
-    if (!open) return;
-    setSelected(normalizeSelected(options, value));
+    if (open && !wasOpen.current) setSelected(normalizeSelected(options, value));
+    wasOpen.current = open;
   }, [open, options, value]);
 
   const selectedFieldSet = new Set(selected?.map((it) => it?.field));
