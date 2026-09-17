@@ -1,5 +1,7 @@
 # MAS-CMS
 
+[在线演示](https://tingxi8087.github.io/mas-cms/) · [部署状态](https://github.com/tingxi8087/mas-cms/actions/workflows/pages.yml)
+
 MAS-CMS 是一个基于 React + Vite + TypeScript + Ant Design 的后台管理模板。它更偏向“可直接开业务”的中后台骨架：内置 Hash 路由、权限包装、固定后台布局、请求封装、搜索表单、表格分页 hooks、CRUD 示例页，以及 e-boxes 状态示例。
 
 这个模板的目标不是做一个花哨的展示站，而是提供一套稳定、清晰、容易复制的后台页面写法。新增页面时，优先复用已有的布局、搜索表单、表格 hooks 和 8px 间距规范。
@@ -61,6 +63,16 @@ npm run build:dev
 ```bash
 npm run preview
 ```
+
+## 在线演示部署
+
+演示站点展示 `main` 分支，使用本地 Mock 数据，无需后端服务。数据修改只在浏览器当前运行期间有效，刷新后恢复初始数据。
+
+发布流程位于 [.github/workflows/pages.yml](.github/workflows/pages.yml)。首次使用时，在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。之后每次推送 `main` 都会安装依赖、执行检查并发布 `dist`；也可以在 Actions 中选择该工作流，针对 `main` 手动运行。
+
+部署使用 `npm run build -- --base=/mas-cms/`，适配 GitHub Pages 的仓库子路径；本地开发和其他构建方式保持不变。Hash 路由支持直接打开页面和刷新。
+
+参考：[Vite 的 GitHub Pages 部署说明](https://vite.dev/guide/static-deploy.html#github-pages)。
 
 ## 项目结构
 
